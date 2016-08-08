@@ -11,23 +11,7 @@ Param (
  
 Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
  
-	Node fileserver
-
-    {
-        LocalConfigurationManager
-        {
-            ConfigurationMode = 'ApplyAndAutoCorrect'
-            RebootNodeIfNeeded = $true
-            ActionAfterReboot = 'ContinueConfiguration'
-            AllowModuleOverwrite = $true
-        }
-
-		 WindowsFeature DNS_RSAT
-        { 
-            Ensure = "Present"
-            Name = "RSAT-DNS-Server"
-        }
-
+	
 Node $AllNodes.Where{$_.Role -eq "DC"}.Nodename
     {
         LocalConfigurationManager

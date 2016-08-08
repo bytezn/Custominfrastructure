@@ -83,15 +83,15 @@
     "wadcfgxstart": "[concat(variables('wadlogs'), variables('wadperfcounters1'), variables('wadperfcounters2'), '<Metrics resourceId=\"')]",
     "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmName'))]",
     "wadcfgxend": "><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>",
-    "assetLocation": "https://raw.githubusercontent.com/bytezn/CustomPayload/master/Activedirectory-with-dsccredential",
+    "assetLocation": "https://raw.githubusercontent.com/bytezn/CustomPayload/master/Activedirectory-with-dsccredential-fileserver",
     "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main",
-      "fileserverOSDiskName": "fileserverOSDisk",
-      "fileserverVmSize": "Standard_D1",
-      "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-      "fileserverSubnetRef": "[concat(variables('fileserverVnetID'), '/subnets/', variables('subnetName'))]",
-      "fileserverStorageAccountContainerName": "vhds",
-      "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
-      "dscfileserverConfigurationFunction": "dscfileserverConfiguration.ps1\\Main"
+    "fileserverOSDiskName": "fileserverOSDisk",
+    "fileserverVmSize": "Standard_D1",
+    "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "fileserverSubnetRef": "[concat(variables('fileserverVnetID'), '/subnets/', variables('subnetName'))]",
+    "fileserverStorageAccountContainerName": "vhds",
+    "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
+    "dscfileserverConfigurationFunction": "dscfileserverConfiguration.ps1\\Main"
   },
   "resources": [
     {
@@ -354,7 +354,7 @@
               "autoUpgradeMinorVersion": true,
               "settings": {
                 "ModulesURL": "[concat(variables('assetLocation'),'/dscDCConfiguration.ps1.zip')]",
-                "configurationFunction": "[variables('dscDCConfigurationFunction')]",
+                "configurationFunction": "[variables('dscfileserverConfigurationFunction')]",
                 "properties": {
                   "nodeName": "[parameters('fileservername')]",
                   "domainName": "[parameters('domainName')]",
