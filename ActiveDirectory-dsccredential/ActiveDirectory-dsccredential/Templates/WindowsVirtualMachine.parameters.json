@@ -12,13 +12,10 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "lawrancedeploy"
+      "value": "lawblog1"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
-    },
-      "DscdscName": {
-          "value": "dscname"
-      }
+    }
   }
 }

@@ -4,7 +4,7 @@
 
 Param(
     [string] [Parameter(Mandatory=$true)] $ResourceGroupLocation,
-    [string] $ResourceGroupName = 'AzureResourceGroup37',
+    [string] $ResourceGroupName = 'ActiveDirectory-dsccredential',
     [switch] $UploadArtifacts,
     [string] $StorageAccountName,
     [string] $StorageAccountResourceGroupName, 
@@ -63,7 +63,7 @@ if ($UploadArtifacts) {
 
     $StorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName).Context
 
-    # Copy Configuration Data files into staging directory
+   # Copy Configuration Data files into staging directory
 Get-ChildItem $DSCSourceFolder -File -Filter '*.psd1' | Copy-Item -Destination $ArtifactStagingDirectory -Force
  
 # Create DSC configuration archive

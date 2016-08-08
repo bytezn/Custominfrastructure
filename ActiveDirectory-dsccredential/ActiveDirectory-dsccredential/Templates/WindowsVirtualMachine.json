@@ -21,10 +21,7 @@
       "metadata": {
         "description": "Domain Name for the Forest."
       }
-
-
     },
-
     "dnsNameForPublicIP": {
       "type": "string",
       "minLength": 1,
@@ -43,42 +40,7 @@
       "metadata": {
         "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
       }
-    },
-      "DscdscName": {
-          "type": "string",
-          "minLength": 1
-      },
-      "DscdscSKU": {
-          "type": "string",
-          "allowedValues": [
-              "Free",
-              "Shared",
-              "Basic",
-              "Standard"
-          ],
-          "defaultValue": "Free"
-      },
-      "DscdscWorkerSize": {
-          "type": "string",
-          "allowedValues": [
-              "0",
-              "1",
-              "2"
-          ],
-          "defaultValue": "0"
-      },
-      "_artifactsLocation": {
-          "type": "string",
-          "metadata": {
-              "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
-          }
-      },
-      "_artifactsLocationSasToken": {
-          "type": "securestring",
-          "metadata": {
-              "description": "Auto-generated token to access _artifactsLocation"
-          }
-      }
+    }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
@@ -107,8 +69,8 @@
     "wadcfgxstart": "[concat(variables('wadlogs'), variables('wadperfcounters1'), variables('wadperfcounters2'), '<Metrics resourceId=\"')]",
     "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmName'))]",
     "wadcfgxend": "><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>",
-    "dscdscConfigurationFunction": "dscdscConfiguration.ps1\\Main",
-    "assetLocation": "https://raw.githubusercontent.com/bytezn/AzureStuff/master/active-directory-credential"
+    "assetLocation": "https://raw.githubusercontent.com/bytezn/CustomPayload/master/Activedirectory-with-dsccredential",
+    "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main"
   },
   "resources": [
     {
@@ -244,33 +206,6 @@
       },
       "resources": [
         {
-          "type": "extensions",
-          "name": "Microsoft.Insights.VMDiagnosticsSettings",
-          "apiVersion": "2015-06-15",
-          "location": "[resourceGroup().location]",
-          "tags": {
-            "displayName": "AzureDiagnostics"
-          },
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "properties": {
-            "publisher": "Microsoft.Azure.Diagnostics",
-            "type": "IaaSDiagnostics",
-            "typeHandlerVersion": "1.5",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "xmlCfg": "[base64(concat(variables('wadcfgxstart'), variables('wadmetricsresourceid'), variables('wadcfgxend')))]",
-              "storageAccount": "[variables('diagnosticsStorageAccountName')]"
-            },
-            "protectedSettings": {
-              "storageAccountName": "[variables('diagnosticsStorageAccountName')]",
-              "storageAccountKey": "[listkeys(variables('accountid'), '2015-06-15').key1]",
-              "storageAccountEndPoint": "https://core.windows.net"
-            }
-          }
-        },
-        {
           "name": "dscDC",
           "type": "extensions",
           "location": "[resourceGroup().location]",
@@ -287,8 +222,8 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "configurationFunction": "[variables('dscdscConfigurationFunction')]",
+              "ModulesURL": "[concat(variables('assetLocation'),'/dscDCConfiguration.ps1.zip')]",
+              "configurationFunction": "[variables('dscDCConfigurationFunction')]",
               "properties": {
                 "nodeName": "[variables('vmName')]",
                 "domainName": "[parameters('domainName')]",
@@ -302,7 +237,7 @@
               "items": {
                 "Password": "[parameters('adminPassword')]"
               },
-              "DataBlobUri": "[concat(variables('assetLocation'), '/script.psd1')]"
+              "DataBlobUri": "[concat(variables('assetlocation'), '/dscDCConfigData.psd1')]"
             }
           }
         }
