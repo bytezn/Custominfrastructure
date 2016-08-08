@@ -45,13 +45,6 @@
           "type": "string",
           "minLength": 1
       },
-      "fileserverAdminUserName": {
-          "type": "string",
-          "minLength": 1
-      },
-      "fileserverAdminPassword": {
-          "type": "securestring"
-      },
       "fileserverWindowsOSVersion": {
           "type": "string",
           "defaultValue": "2012-R2-Datacenter",
@@ -92,14 +85,13 @@
     "wadcfgxend": "><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>",
     "assetLocation": "https://raw.githubusercontent.com/bytezn/CustomPayload/master/Activedirectory-with-dsccredential",
     "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main",
-      "fileserverImagePublisher": "MicrosoftWindowsServer",
-      "fileserverImageOffer": "WindowsServer",
       "fileserverOSDiskName": "fileserverOSDisk",
       "fileserverVmSize": "Standard_D1",
       "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
       "fileserverSubnetRef": "[concat(variables('fileserverVnetID'), '/subnets/', variables('subnetName'))]",
       "fileserverStorageAccountContainerName": "vhds",
-      "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]"
+      "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
+      "dscfileserverConfigurationFunction": "dscfileserverConfiguration.ps1\\Main"
   },
   "resources": [
     {
@@ -314,18 +306,18 @@
               "hardwareProfile": {
                   "vmSize": "[variables('fileserverVmSize')]"
               },
-              "osProfile": {
-                  "computerName": "[parameters('fileserverName')]",
-                  "adminUsername": "[parameters('fileserverAdminUsername')]",
-                  "adminPassword": "[parameters('fileserverAdminPassword')]"
-              },
+            "osProfile": {
+              "computerName": "[variables('vmName')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
               "storageProfile": {
-                  "imageReference": {
-                      "publisher": "[variables('fileserverImagePublisher')]",
-                      "offer": "[variables('fileserverImageOffer')]",
-                      "sku": "[parameters('fileserverWindowsOSVersion')]",
-                      "version": "latest"
-                  },
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
                   "osDisk": {
                       "name": "fileserverOSDisk",
                       "vhd": {
@@ -342,7 +334,45 @@
                       }
                   ]
               }
+          },
+        "resources": [
+          {
+            "name": "dscfileserver",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]"
+            ],
+            "tags": {
+              "displayName": "dscfileserver"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "ModulesURL": "[concat(variables('assetLocation'),'/dscDCConfiguration.ps1.zip')]",
+                "configurationFunction": "[variables('dscDCConfigurationFunction')]",
+                "properties": {
+                  "nodeName": "[parameters('fileservername')]",
+                  "domainName": "[parameters('domainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                },
+                "DataBlobUri": "[concat(variables('assetlocation'), '/dscDCConfigData.psd1')]"
+              }
+            }
           }
+        ]
       }
   ]
 }

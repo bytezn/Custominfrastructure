@@ -12,10 +12,13 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "lawblog2"
+      "value": "lawblog5"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
-    }
+    },
+      "fileserverName": {
+          "value": "fileserver"
+      }
   }
 }
