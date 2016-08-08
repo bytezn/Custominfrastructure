@@ -17,7 +17,6 @@ Node $nodeName
  	WindowsFeature fileandstorage-services 
  	{
  		Name                      = "filestorage"
- 		Credential                = $domainAdminCredentials
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true
  	}
