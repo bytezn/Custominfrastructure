@@ -3,16 +3,16 @@
   "contentVersion": "1.0.0.0",
   "parameters": {
     "adminUsername": {
-      "value": "mark"
+      "value": "lawrance"
     },
     "adminPassword": {
-      "value": "P@ssw0rd123!"
+      "value": "Master123"
     },
     "domainName": {
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "blogdc01"
+      "value": "myblog"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
