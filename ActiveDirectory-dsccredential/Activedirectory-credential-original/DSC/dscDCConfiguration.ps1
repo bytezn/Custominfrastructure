@@ -11,7 +11,7 @@ Param (
  
 Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
  
-Node $AllNodes.Where{$_.Role -eq "DC"}.Nodename
+Node localhost
     {
         LocalConfigurationManager
         {

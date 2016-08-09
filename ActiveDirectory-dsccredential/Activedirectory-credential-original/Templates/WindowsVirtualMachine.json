@@ -276,9 +276,8 @@
             "protectedSettings": {
               "items": {
                 "Password": "[parameters('adminPassword')]"
-              },
-              "DataBlobUri": "[concat(parameters('_artifactsLocation'), '/dscDCConfigData.psd1')]"
-            }
+              }
+                          }
           }
         }
 
