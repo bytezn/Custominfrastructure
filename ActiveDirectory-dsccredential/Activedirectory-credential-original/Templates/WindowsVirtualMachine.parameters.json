@@ -12,11 +12,14 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "mymy244"
+      "value": "mymy2445"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
-    }
+    },
+      "fileserverName": {
+          "value": "fileserver"
+      }
     
       }
   }
