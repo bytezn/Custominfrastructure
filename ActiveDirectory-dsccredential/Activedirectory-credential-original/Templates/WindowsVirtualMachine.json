@@ -87,10 +87,11 @@
     "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmName'))]",
     "wadcfgxend": "><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>",
     "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main",
-      "fileserverOSDiskName": "fileserverOSDisk",
-      "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-      "fileserverStorageAccountContainerName": "vhds",
-      "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]"
+    "fileserverOSDiskName": "fileserverOSDisk",
+    "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "fileserverStorageAccountContainerName": "vhds",
+    "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
+    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver"
   },
   "resources": [
     {
@@ -333,7 +334,36 @@
                       }
                   ]
               }
-          }
+          },
+          "resources": [
+              {
+                  "name": "fileserverdsc",
+                  "type": "extensions",
+                  "location": "[resourceGroup().location]",
+                  "apiVersion": "2015-06-15",
+                  "dependsOn": [
+                      "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
+                  ],
+                  "tags": {
+                      "displayName": "fileserverdsc"
+                  },
+                  "properties": {
+                      "publisher": "Microsoft.Powershell",
+                      "type": "DSC",
+                      "typeHandlerVersion": "2.9",
+                      "autoUpgradeMinorVersion": true,
+                    "settings": {
+                      "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                      "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                      "configurationFunction": "[variables('fileserverdscConfigurationFunction')]",
+                      "properties": {
+                        "nodeName": "[parameters('fileserverName')]"
+                      }
+                    },
+                      "protectedSettings": { }
+                  }
+              }
+          ]
       }
   ]
 }

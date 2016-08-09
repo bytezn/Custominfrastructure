@@ -1,3 +1,36 @@
+Configuration fileserver
+{
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $domainName,
+    [System.Management.Automation.PSCredential]$domainAdminCredentials
+)
+ 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
+ 
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+ 
+        WindowsFeature storageservices
+        { 
+            Ensure = "Present"
+            Name = "fileandstorage-services"
+        }
+ }
+
+}
+
+
 Configuration Main
 {
  
