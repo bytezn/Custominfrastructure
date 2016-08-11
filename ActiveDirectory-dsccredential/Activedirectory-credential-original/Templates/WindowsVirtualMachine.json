@@ -96,7 +96,7 @@
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
-    "vmName": "MyWindowsVM",
+    "vmName": "dc",
     "vmSize": "Standard_A2",
     "virtualNetworkName": "MyVNET",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -375,7 +375,8 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/',variables('vmname'),'/extensions/dscDC')]"
           ],
           "tags": {
             "displayName": "fileserverdsc"
