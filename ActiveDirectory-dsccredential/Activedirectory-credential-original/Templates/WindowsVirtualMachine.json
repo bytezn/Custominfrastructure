@@ -2,7 +2,7 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
-     "location": {
+    "location": {
       "type": "string",
       "allowedValues": [
         "West US",
@@ -23,14 +23,14 @@
       "metadata": {
         "description": "Username for the Virtual Machine."
       }
-      },
+    },
 
-      "virtualNetworkName": {
-        "type": "string",
-        "metadata": {
-          "description": "The name of the Virtual Network to Create"
-        }
-      
+    "virtualNetworkName": {
+      "type": "string",
+      "metadata": {
+        "description": "The name of the Virtual Network to Create"
+      }
+
 
     },
     "adminPassword": {
@@ -297,7 +297,7 @@
       "apiVersion": "2015-06-15",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "Microsoft.Resources/deployments/Updatednsvnet"
+     
       ],
       "tags": {
         "displayName": "fileserverNic"
@@ -313,8 +313,13 @@
               }
             }
           }
-        ]
+        ],
 
+        "dnsSettings": {
+          "dnsServers": [ "10.0.0.4" ]
+          
+        }  
+            
       }
 
     },
@@ -392,46 +397,17 @@
           }
         }
       ]
-    },
-    {
-      "name": "updatednsvnet",
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2015-01-01",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "templateLink": {
-          "uri": "https://raw.githubusercontent.com/bytezn/CustomPayload/master/sharedpayload/vnet-with-dns-server.json",
-          "contentVersion": "1.0.0.0"
-                     
-          },
-        "parameters": {
-            "virtualNetworkName": {
-            "value": "[parameters('virtualNetworkName')]"
-            },
-            "virtualNetworkAddressRange": {
-              "value": "[variables('addressprefix')]"
-            },
-            "subnetName": {
-              "value": "[variables('SubnetName')]"
-            },
-            "subnetRange": {
-              "value": "[variables('subnetprefix')]"
-            },
-
-            "DNSServerAddress": {
-              "value": [
-                "[variables('adNicIPAddress')]"
-              ]
-            }
-
-          }
-        }
     }
   ]
 }
+      
+        
+      
+    
+  
+  
+ 
+
   
 
         
