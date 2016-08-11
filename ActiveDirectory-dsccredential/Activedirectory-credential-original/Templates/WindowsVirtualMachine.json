@@ -2,12 +2,36 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+     "location": {
+      "type": "string",
+      "allowedValues": [
+        "West US",
+        "East US",
+        "West Europe",
+        "North Europe",
+        "East Asia",
+        "Southeast Asia"
+      ],
+      "metadata": {
+        "description": "The region to deploy the resources into"
+      }
+    },
+
     "adminUsername": {
       "type": "string",
       "minLength": 1,
       "metadata": {
         "description": "Username for the Virtual Machine."
       }
+      },
+
+      "virtualNetworkName": {
+        "type": "string",
+        "metadata": {
+          "description": "The name of the Virtual Network to Create"
+        }
+      
+
     },
     "adminPassword": {
       "type": "securestring",
@@ -54,13 +78,14 @@
         "description": "Auto-generated token to access _artifactsLocation"
       }
     },
-      "fileserverName": {
-          "type": "string",
-          "minLength": 1
-      }
+    "fileserverName": {
+      "type": "string",
+      "minLength": 1
+    }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
+    "adNicIPAddress": "10.0.0.4",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
@@ -259,111 +284,158 @@
               "items": {
                 "Password": "[parameters('adminPassword')]"
               }
-                          }
+            }
           }
         }
 
       ]
     },
-      {
-          "name": "[variables('fileserverNicName')]",
-          "type": "Microsoft.Network/networkInterfaces",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-          ],
-          "tags": {
-              "displayName": "fileserverNic"
-          },
-          "properties": {
-              "ipConfigurations": [
-                  {
-                      "name": "ipconfig1",
-                      "properties": {
-                          "privateIPAllocationMethod": "Dynamic",
-                        "subnet": {
-                          "id": "[variables('subnetRef')]"
-                        }
-                      }
-                  }
-              ]
-          }
+    {
+      "name": "[variables('fileserverNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "Microsoft.Resources/deployments/Updatednsvnet"
+      ],
+      "tags": {
+        "displayName": "fileserverNic"
       },
-      {
-          "name": "[parameters('fileserverName')]",
-          "type": "Microsoft.Compute/virtualMachines",
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
+              }
+            }
+          }
+        ]
+
+      }
+
+    },
+    {
+      "name": "[parameters('fileserverName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserverNicName'))]"
+      ],
+      "tags": {
+        "displayName": "fileserver"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('fileservername')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "fileserverOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserverStorageAccountContainerName'), '/', variables('fileserverOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserverNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "fileserverdsc",
+          "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-              "[concat('Microsoft.Network/networkInterfaces/', variables('fileserverNicName'))]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
           ],
           "tags": {
-              "displayName": "fileserver"
+            "displayName": "fileserverdsc"
           },
           "properties": {
-            "hardwareProfile": {
-              "vmSize": "[variables('vmSize')]"
-            },
-            "osProfile": {
-              "computerName": "[variables('vmName')]",
-              "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]"
-            },
-              "storageProfile": {
-                "imageReference": {
-                  "publisher": "[variables('imagePublisher')]",
-                  "offer": "[variables('imageOffer')]",
-                  "sku": "[parameters('windowsOSVersion')]",
-                  "version": "latest"
-                },
-                  "osDisk": {
-                      "name": "fileserverOSDisk",
-                      "vhd": {
-                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserverStorageAccountContainerName'), '/', variables('fileserverOSDiskName'), '.vhd')]"
-                      },
-                      "caching": "ReadWrite",
-                      "createOption": "FromImage"
-                  }
-              },
-              "networkProfile": {
-                  "networkInterfaces": [
-                      {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserverNicName'))]"
-                      }
-                  ]
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('fileserverdscConfigurationFunction')]",
+              "properties": {
+                "nodeName": "[parameters('fileserverName')]"
               }
+            },
+            "protectedSettings": { }
+          }
+        }
+      ]
+    },
+    {
+      "name": "updatednsvnet",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/bytezn/CustomPayload/master/sharedpayload/vnet-with-dns-server.json",
+          "contentVersion": "1.0.0.0"
+                     
           },
-          "resources": [
-              {
-                  "name": "fileserverdsc",
-                  "type": "extensions",
-                  "location": "[resourceGroup().location]",
-                  "apiVersion": "2015-06-15",
-                  "dependsOn": [
-                      "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
-                  ],
-                  "tags": {
-                      "displayName": "fileserverdsc"
-                  },
-                  "properties": {
-                      "publisher": "Microsoft.Powershell",
-                      "type": "DSC",
-                      "typeHandlerVersion": "2.9",
-                      "autoUpgradeMinorVersion": true,
-                    "settings": {
-                      "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                      "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                      "configurationFunction": "[variables('fileserverdscConfigurationFunction')]",
-                      "properties": {
-                        "nodeName": "[parameters('fileserverName')]"
-                      }
-                    },
-                      "protectedSettings": { }
-                  }
-              }
-          ]
-      }
+        "parameters": {
+            "virtualNetworkName": {
+            "value": "[parameters('virtualNetworkName')]"
+            },
+            "virtualNetworkAddressRange": {
+              "value": "[variables('addressprefix')]"
+            },
+            "subnetName": {
+              "value": "[variables('SubnetName')]"
+            },
+            "subnetRange": {
+              "value": "[variables('subnetprefix')]"
+            },
+
+            "DNSServerAddress": {
+              "value": [
+                "[variables('adNicIPAddress')]"
+              ]
+            }
+
+          }
+        }
+    }
   ]
 }
+  
+
+        
+        
+    
+  
+

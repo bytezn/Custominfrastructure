@@ -12,13 +12,19 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "mymy24457"
+      "value": "mmdsesw2"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
       "fileserverName": {
           "value": "fileserver"
+      },
+      "location": {
+          "value": "West Europe"
+      },
+      "virtualNetworkName": {
+          "value": "myvnet"
       }
     
       }
