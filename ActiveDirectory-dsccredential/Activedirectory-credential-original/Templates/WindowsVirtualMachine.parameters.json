@@ -12,7 +12,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "dnsdeploy2222"
+      "value": "deployment01"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
