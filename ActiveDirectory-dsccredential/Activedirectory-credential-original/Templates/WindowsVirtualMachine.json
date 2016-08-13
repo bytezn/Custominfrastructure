@@ -86,6 +86,7 @@
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
     "adNicIPAddress": "10.0.0.4",
+    "fsNicIPAddress": "10.0.0.5",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
@@ -187,7 +188,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('adnicipaddress')]",
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
               },
@@ -307,7 +309,8 @@
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('fsnicipaddress')]",
               "subnet": {
                 "id": "[variables('subnetRef')]"
               }
@@ -375,7 +378,8 @@
           "name": "fileserverdj",
           "location": "[resourceGroup().location]",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]",
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
           ],
           "properties": {
             "publisher": "Microsoft.Compute",
