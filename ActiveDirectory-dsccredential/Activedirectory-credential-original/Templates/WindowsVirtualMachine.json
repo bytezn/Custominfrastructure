@@ -81,12 +81,17 @@
     "fileserverName": {
       "type": "string",
       "minLength": 1
-    }
+    },
+      "bdcName": {
+          "type": "string",
+          "minLength": 1
+      }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
     "adNicIPAddress": "10.0.0.4",
     "fsNicIPAddress": "10.0.0.5",
+    "bdcnicipaddress": "10.0.0.6",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
@@ -117,7 +122,11 @@
     "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "fileserverStorageAccountContainerName": "vhds",
     "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
-    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver"
+    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver",
+    "bdcOSDiskName": "bdcOSDisk",
+    "bdcVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "bdcStorageAccountContainerName": "vhds",
+    "bdcNicName": "[concat(parameters('bdcName'), 'NetworkInterface')]"
   },
   "resources": [
     {
@@ -326,79 +335,78 @@
       }
 
     },
-    {
-      "name": "[parameters('fileserverName')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserverNicName'))]"
-      ],
-      "tags": {
-        "displayName": "fileserver"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[parameters('fileservername')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "fileserverOSDisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserverStorageAccountContainerName'), '/', variables('fileserverOSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserverNicName'))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-        {
-          "apiVersion": "2015-06-15",
-          "type": "extensions",
-          "name": "fileserverdj",
+      {
+          "name": "[variables('bdcNicName')]",
+          "type": "Microsoft.Network/networkInterfaces",
           "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
           ],
+          "tags": {
+              "displayName": "bdcNic"
+          },
           "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "JsonADDomainExtension",
-            "typeHandlerVersion": "1.0",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "Name": "[parameters('DomainName')]",
-              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-              "Restart": "true",
-              "Options": "3"
-            },
-            "protectedsettings": {
-              "Password": "[parameters('adminPassword')]"
-            }
+              "ipConfigurations": [
+                  {
+                      "name": "ipconfig1",
+                    "properties": {
+                      "privateIPAllocationMethod": "Static",
+                      "privateIPAddress": "[variables('bdcnicipaddress')]",
+                      "subnet": {
+                        "id": "[variables('subnetRef')]"
+                      }
+                    }
+                  }
+              ]
           }
-        }
-      ]
-    }
+      },
+      {
+          "name": "[parameters('bdcName')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+              "[concat('Microsoft.Network/networkInterfaces/', variables('bdcNicName'))]"
+          ],
+          "tags": {
+              "displayName": "bdc"
+          },
+          "properties": {
+            "hardwareProfile": {
+              "vmSize": "[variables('vmSize')]"
+            },
+            "osProfile": {
+              "computerName": "[parameters('bdcName')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
+              "storageProfile": {
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
+                  "osDisk": {
+                      "name": "bdcOSDisk",
+                      "vhd": {
+                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('bdcNicName'))]"
+                      }
+                  ]
+              }
+          }
+      }
   ]
 }
       
