@@ -12,7 +12,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "airbus0888"
+      "value": "abus78888"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -27,7 +27,7 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "bdc01"
+          "value": "bdc0754"
       }
     
       }

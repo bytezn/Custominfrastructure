@@ -126,7 +126,8 @@
     "bdcOSDiskName": "bdcOSDisk",
     "bdcVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "bdcStorageAccountContainerName": "vhds",
-    "bdcNicName": "[concat(parameters('bdcName'), 'NetworkInterface')]"
+    "bdcNicName": "[concat(parameters('bdcName'), 'NetworkInterface')]",
+    "dscbdcConfigurationFunction": "dscDCConfiguration.ps1\\bdc"
   },
   "resources": [
     {
@@ -347,18 +348,22 @@
               "displayName": "bdcNic"
           },
           "properties": {
-              "ipConfigurations": [
-                  {
-                      "name": "ipconfig1",
-                    "properties": {
-                      "privateIPAllocationMethod": "Static",
-                      "privateIPAddress": "[variables('bdcnicipaddress')]",
-                      "subnet": {
-                        "id": "[variables('subnetRef')]"
-                      }
-                    }
+            "ipConfigurations": [
+              {
+                "name": "ipconfig1",
+                "properties": {
+                  "privateIPAllocationMethod": "Static",
+                  "privateIPAddress": "[variables('bdcnicipaddress')]",
+                  "subnet": {
+                    "id": "[variables('subnetRef')]"
                   }
-              ]
+                }
+              }
+            ],
+            "dnsSettings": {
+              "dnsServers": [ "10.0.0.4" ]
+
+            }
           }
       },
       {
@@ -405,7 +410,45 @@
                       }
                   ]
               }
+          },
+        "resources": [
+          {
+            "name": "dscbdc",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('bdcname'))]",
+                     "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
+            ],
+            "tags": {
+              "displayName": "dscDC"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
+                "properties": {
+                  "domainName": "[parameters('domainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
+              }
+            }
           }
+        ]
       }
   ]
 }

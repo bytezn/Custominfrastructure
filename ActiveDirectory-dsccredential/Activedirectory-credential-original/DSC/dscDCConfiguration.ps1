@@ -1,3 +1,60 @@
+configuration bdc
+{ 
+   param 
+    ( 
+        [Parameter(Mandatory)]
+        [String]$DomainName,
+
+        [Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$domainAdmincredentials,
+
+        [Int]$RetryCount=20,
+        [Int]$RetryIntervalSec=30
+    ) 
+    
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+    
+    [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
+   
+    Node localhost
+    {
+        LocalConfigurationManager            
+        {            
+            ActionAfterReboot = 'ContinueConfiguration'            
+            ConfigurationMode = 'ApplyOnly'            
+            RebootNodeIfNeeded = $true            
+           
+      
+        }
+        WindowsFeature ADDSInstall 
+        { 
+            Ensure = "Present" 
+            Name = "AD-Domain-Services"
+        } 
+
+        xWaitForADDomain DscForestWait 
+        { 
+            DomainName = $DomainName 
+            DomainUserCredential= $DomainCreds
+            RetryCount = $RetryCount 
+            RetryIntervalSec = $RetryIntervalSec
+        } 
+
+        xADDomainController BDC 
+        { 
+            DomainName = $DomainName 
+            DomainAdministratorCredential = $DomainCreds 
+            SafemodeAdministratorPassword = $DomainCreds
+            DatabasePath = "c:\NTDS"
+            LogPath = "c:\NTDS"
+            SysvolPath = "c:\SYSVOL"
+        }
+	   
+    }
+  
+ }  
+
+	 
 Configuration fileserver
 {
  
