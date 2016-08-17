@@ -12,14 +12,11 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "erdsss"
+      "value": "jgate1"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
-    },
-      "fileserverName": {
-          "value": "fileserver"
-      },
+     },
       "location": {
           "value": "West Europe"
       },
@@ -27,7 +24,10 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "bdc0754"
+          "value": "bdc070"
+      },
+      "fileserver2Name": {
+          "value": "joshgatefs"
       }
     
       }

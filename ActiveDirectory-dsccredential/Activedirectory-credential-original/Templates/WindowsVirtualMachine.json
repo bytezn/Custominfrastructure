@@ -78,11 +78,11 @@
         "description": "Auto-generated token to access _artifactsLocation"
       }
     },
-    "fileserverName": {
-      "type": "string",
-      "minLength": 1
-    },
-      "bdcName": {
+    "bdcName": {
+          "type": "string",
+          "minLength": 1
+      },
+      "fileserver2Name": {
           "type": "string",
           "minLength": 1
       }
@@ -90,7 +90,7 @@
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
     "adNicIPAddress": "10.0.0.4",
-    "fsNicIPAddress": "10.0.0.5",
+    "fsnicipaddress": "10.0.0.5",
     "bdcnicipaddress": "10.0.0.6",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
@@ -118,16 +118,16 @@
     "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmName'))]",
     "wadcfgxend": "><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>",
     "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main",
-    "fileserverOSDiskName": "fileserverOSDisk",
-    "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-    "fileserverStorageAccountContainerName": "vhds",
-    "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
-    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver",
     "bdcOSDiskName": "bdcOSDisk",
     "bdcVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "bdcStorageAccountContainerName": "vhds",
     "bdcNicName": "[concat(parameters('bdcName'), 'NetworkInterface')]",
-    "dscbdcConfigurationFunction": "dscDCConfiguration.ps1\\bdc"
+    "dscbdcConfigurationFunction": "dscDCConfiguration.ps1\\bdc",
+    "fileserver2OSDiskName": "fileserver2OSDisk",
+    "fileserverVmSize": "Standard_D1",
+    "fileserver2VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "fileserver2StorageAccountContainerName": "vhds",
+    "fileserver2NicName": "[concat(parameters('fileserver2Name'), 'NetworkInterface')]"
   },
   "resources": [
     {
@@ -303,40 +303,6 @@
       ]
     },
     {
-      "name": "[variables('fileserverNicName')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-     
-      ],
-      "tags": {
-        "displayName": "fileserverNic"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('fsnicipaddress')]",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ],
-
-        "dnsSettings": {
-          "dnsServers": [ "10.0.0.4" ]
-          
-        }  
-            
-      }
-
-    },
-      {
           "name": "[variables('bdcNicName')]",
           "type": "Microsoft.Network/networkInterfaces",
           "location": "[resourceGroup().location]",
@@ -445,6 +411,110 @@
                 "items": {
                   "Password": "[parameters('adminPassword')]"
                 }
+              }
+            }
+          }
+        ]
+      },
+      {
+          "name": "[variables('fileserver2NicName')]",
+          "type": "Microsoft.Network/networkInterfaces",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+          ],
+          "tags": {
+              "displayName": "fileserverNic"
+          },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[variables('fsnicipaddress')]",
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
+                }
+              }
+            }
+          ],
+
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.4" ]
+          }
+         }
+        },
+
+      {
+          "name": "[parameters('fileserver2Name')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+              "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]"
+          ],
+          "tags": {
+              "displayName": "fileserver"
+          },
+          "properties": {
+            "hardwareProfile": {
+              "vmSize": "[variables('vmSize')]"
+            },
+            "osProfile": {
+              "computerName": "[parameters('fileserver2Name')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
+              "storageProfile": {
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
+                  "osDisk": {
+                      "name": "fileserverOSDisk",
+                      "vhd": {
+                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver2NicName'))]"
+                      }
+                  ]
+              }
+          },
+        "resources": [
+          {
+            "apiVersion": "2015-06-15",
+            "type": "extensions",
+            "name": "fileserverdj",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
+              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "JsonADDomainExtension",
+              "typeHandlerVersion": "1.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "Name": "[parameters('DomainName')]",
+                "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                "Restart": "true",
+                "Options": "3"
+              },
+              "protectedsettings": {
+                "Password": "[parameters('adminPassword')]"
               }
             }
           }
