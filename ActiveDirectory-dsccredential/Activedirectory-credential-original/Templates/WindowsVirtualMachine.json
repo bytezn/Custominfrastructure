@@ -24,11 +24,11 @@
         "description": "Username for the Virtual Machine."
       }
     },
-    "numberOfRdshInstances": {
+    "numberOfwebInstances": {
       "type": "int",
       "defaultValue": 2,
       "metadata": {
-        "description": "Number of RDSH instances"
+        "description": "Number of web instances"
       }
     },
 
@@ -139,6 +139,7 @@
     "webOSDiskName": "webOSDisk",
     "webVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "webStorageAccountContainerName": "vhds"
+      
 
   },
   "resources": [
@@ -535,13 +536,14 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat('rdsh-', copyindex(), '-nic')]",
+      "name": "[concat('web-', copyindex(), '-nic')]",
       "location": "[resourceGroup().location]",
       "copy": {
-        "name": "rdsh-nic-loop",
-        "count": "[parameters('numberOfRdshInstances')]"
+        "name": "web-nic-loop",
+        "count": "[parameters('numberOfwebInstances')]"
       },
       "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
 
       ],
       "properties": {
@@ -566,15 +568,15 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat('rdsh-', copyindex())]",
+      "name": "[concat('web-', copyindex())]",
       "location": "[resourceGroup().location]",
       "copy": {
-        "name": "rdsh-vm-loop",
-        "count": "[parameters('numberOfRdshInstances')]"
+        "name": "web-vm-loop",
+        "count": "[parameters('numberOfwebInstances')]"
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdstorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', 'rdsh-', copyindex(), '-nic')]"
+        "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -582,7 +584,7 @@
 
         },
         "osProfile": {
-          "computerName": "[concat('rdsh-', copyIndex())]",
+          "computerName": "[concat('web-', copyIndex())]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -596,7 +598,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/rdsh-',copyindex(),'-osdisk.vhd')]"
+              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -605,15 +607,42 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('rdsh-', copyindex(), '-nic'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
             }
           ]
         }
-      }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-06-15",
+          "type": "extensions",
+          "name": "webdsc",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "JsonADDomainExtension",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "Name": "[parameters('DomainName')]",
+              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+              "Restart": "true",
+              "Options": "3"
+            },
+            "protectedsettings": {
+              "Password": "[parameters('adminPassword')]"
+            }
+          }
+        }
+      ]
 
     }
   ]
-      }
+  }
   
 
 

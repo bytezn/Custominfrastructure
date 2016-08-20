@@ -12,7 +12,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "j22d"
+      "value": "airbuslb"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -24,10 +24,10 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "bdc32"
+          "value": "airbusbdc"
       },
       "fileserver2Name": {
-          "value": "fs22"
+          "value": "airbusfs"
       }
     
       }
