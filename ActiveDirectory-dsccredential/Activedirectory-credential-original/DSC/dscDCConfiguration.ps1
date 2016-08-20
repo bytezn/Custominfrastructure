@@ -1,3 +1,39 @@
+Configuration web
+{
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $domainName,
+    [System.Management.Automation.PSCredential]$domainAdminCredentials
+)
+ 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+ 
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+ 	
+   		WindowsFeature web 
+     	{
+ 		Name                      = "web-serverr"
+ 		Credential                = $domainAdminCredentials
+ 		Ensure                    = "Present"
+ 		IncludeAllSubFeature      = $true
+    	}
+        
+     }
+
+}
+
+
 configuration bdc
 { 
    param 
