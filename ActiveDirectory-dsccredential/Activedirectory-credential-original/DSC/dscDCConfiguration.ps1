@@ -23,7 +23,7 @@ Node localhost
  	
    		WindowsFeature web 
      	{
- 		Name                      = "web-serverr"
+ 		Name                      = "web-server"
  		Credential                = $domainAdminCredentials
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true

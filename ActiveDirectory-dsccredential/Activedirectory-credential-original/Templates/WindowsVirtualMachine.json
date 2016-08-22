@@ -646,7 +646,10 @@
           "apiVersion": "2015-06-15",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+            "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
+
+
           ],
           "tags": {
             "displayName": "webservicedscDC"
