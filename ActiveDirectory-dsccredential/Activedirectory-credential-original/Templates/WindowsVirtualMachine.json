@@ -649,13 +649,8 @@
                                 {
                                     "id": "[concat(resourceId('Microsoft.Network/loadBalancers','loadBalancer'),'/backendAddressPools/LBBAP')]"
                                 }
-                            ],
-                            "loadBalancerInboundNatRules": [
-                                
-                                {
-                                    "id": "[concat(resourceId('Microsoft.Network/loadBalancers','loadBalancer'),'/inboundNatRules/gateway')]"
-                                }
                             ]
+                           
                         }
                     }
         ],
@@ -677,9 +672,13 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdstorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]"
+        "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]",
+        "[concat('Microsoft.Compute/availabilitySets/', variables('webserversetName'))]"
       ],
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('webserversetName'))]"
+        },
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
 
