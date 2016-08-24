@@ -79,6 +79,7 @@
     "location": "[resourceGroup().location]",
     "dcname": "dc",
     "domainname": "lawrance.com",
+    "_artifactsLocationSasToken": "[parameters('_artifactsLocationSasToken')]",
     "storageAccountType": "Standard_LRS",
     "longNamingInfix": "[toLower(parameters('vmssName'))]",
     "namingInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
@@ -438,7 +439,7 @@
             "autoUpgradeMinorVersion": true,
             "settings": {
               "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDSCConfiguration.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "sasToken": "[variables('_artifactsLocationSasToken')]",
               "configurationFunction": "[variables('dscDSCConfigurationFunction')]",
               "properties": {
                 "nodeName": "[variables('dcName')]",
