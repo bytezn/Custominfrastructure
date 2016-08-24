@@ -61,6 +61,10 @@
               "2012-R2-Datacenter",
               "Windows-Server-Technical-Preview"
           ]
+      },
+      "dcpublicipDnsName": {
+          "type": "string",
+          "minLength": 1
       }
   },
   "variables": {
@@ -115,7 +119,8 @@
       "dcVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
       "dcSubnetRef": "[concat(variables('dcVnetID'), '/subnets/', variables('subnetName'))]",
       "dcStorageAccountContainerName": "vhds",
-      "dcNicName": "[concat(parameters('dcName'), 'NetworkInterface')]"
+      "dcNicName": "[concat(parameters('dcName'), 'NetworkInterface')]",
+      "dcpublicipName": "dcpublicip"
   },
   "resources": [
     {
@@ -334,7 +339,8 @@
           "location": "[variables('location')]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+              "[concat('Microsoft.Network/publicIPAddresses/', variables('dcpublicipName'))]"
           ],
           "tags": {
               "displayName": "dcNic"
@@ -347,6 +353,9 @@
                           "privateIPAllocationMethod": "Dynamic",
                           "subnet": {
                               "id": "[variables('dcSubnetRef')]"
+                          },
+                          "publicIPAddress": {
+                              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('dcpublicipName'))]"
                           }
                       }
                   }
@@ -396,6 +405,22 @@
                           "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcNicName'))]"
                       }
                   ]
+              }
+          }
+      },
+      {
+          "name": "[variables('dcpublicipName')]",
+          "type": "Microsoft.Network/publicIPAddresses",
+          "location": "[variables('location')]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "dcpublicip"
+          },
+          "properties": {
+              "publicIPAllocationMethod": "Dynamic",
+              "dnsSettings": {
+                  "domainNameLabel": "[parameters('dcpublicipDnsName')]"
               }
           }
       }
