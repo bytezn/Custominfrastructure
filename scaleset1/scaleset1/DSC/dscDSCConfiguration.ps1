@@ -1,3 +1,44 @@
+Configuration fileserver
+{
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $domainName,
+    [System.Management.Automation.PSCredential]$domainAdminCredentials
+)
+ 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+ 
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+ 
+         WindowsFeature ADPowershell
+        {
+            Name = "RSAT-AD-PowerShell"
+            Ensure = "Present"
+        } 
+
+        xComputer DomainJoin
+        {
+            Name = $NodeName
+            DomainName = $domainName
+            Credential = $domainAdminCredentials
+            DependsOn = "[WindowsFeature]ADPowershell" 
+        }
+     }
+
+}
+
+
 Configuration Main
 {
  
@@ -11,7 +52,7 @@ Param (
  
 Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
  
-Node $AllNodes.Where{$_.Role -eq "DC"}.Nodename
+Node localhost
     {
         LocalConfigurationManager
         {

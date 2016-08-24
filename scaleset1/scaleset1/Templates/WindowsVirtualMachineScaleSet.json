@@ -48,27 +48,37 @@
         "description": "Administrator password on all VMs"
       }
     },
-      "dcName": {
-          "type": "string",
-          "minLength": 1
-      },
-      "dcWindowsOSVersion": {
-          "type": "string",
-          "defaultValue": "2012-R2-Datacenter",
-          "allowedValues": [
-              "2008-R2-SP1",
-              "2012-Datacenter",
-              "2012-R2-Datacenter",
-              "Windows-Server-Technical-Preview"
-          ]
-      },
-      "dcpublicipDnsName": {
-          "type": "string",
-          "minLength": 1
+    "dcWindowsOSVersion": {
+      "type": "string",
+      "defaultValue": "2012-R2-Datacenter",
+      "allowedValues": [
+        "2008-R2-SP1",
+        "2012-Datacenter",
+        "2012-R2-Datacenter",
+        "Windows-Server-Technical-Preview"
+      ]
+    },
+    "dcpublicipDnsName": {
+      "type": "string",
+      "minLength": 1
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
       }
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "Auto-generated token to access _artifactsLocation"
+      }
+    }
   },
   "variables": {
     "location": "[resourceGroup().location]",
+    "dcname": "dc",
+    "domainname": "lawrance.com",
     "storageAccountType": "Standard_LRS",
     "longNamingInfix": "[toLower(parameters('vmssName'))]",
     "namingInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
@@ -111,16 +121,17 @@
     "wadcfgxstart": "[concat(variables('wadlogs'), variables('wadperfcounters1'), variables('wadperfcounters2'), '<Metrics resourceId=\"')]",
     "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', resourceGroup().name , '/providers/', 'Microsoft.Compute/virtualMachineScaleSets/')]",
     "wadcfgxend": "[concat('\"><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>')]",
-      "dcstorageaccountName": "[concat('dcstorageaccount', uniqueString(resourceGroup().id))]",
-      "dcImagePublisher": "MicrosoftWindowsServer",
-      "dcImageOffer": "WindowsServer",
-      "dcOSDiskName": "dcOSDisk",
-      "dcVmSize": "Standard_D1",
-      "dcVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-      "dcSubnetRef": "[concat(variables('dcVnetID'), '/subnets/', variables('subnetName'))]",
-      "dcStorageAccountContainerName": "vhds",
-      "dcNicName": "[concat(parameters('dcName'), 'NetworkInterface')]",
-      "dcpublicipName": "dcpublicip"
+    "dcstorageaccountName": "[concat('dcstorageaccount', uniqueString(resourceGroup().id))]",
+    "dcImagePublisher": "MicrosoftWindowsServer",
+    "dcImageOffer": "WindowsServer",
+    "dcOSDiskName": "dcOSDisk",
+    "dcVmSize": "Standard_D1",
+    "dcVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "dcSubnetRef": "[concat(variables('dcVnetID'), '/subnets/', variables('subnetName'))]",
+    "dcStorageAccountContainerName": "vhds",
+    "dcNicName": "[concat(variables('dcName'), 'NetworkInterface')]",
+    "dcpublicipName": "dcpublicip",
+    "dscDSCConfigurationFunction": "dscDSCConfiguration.ps1\\Main"
   },
   "resources": [
     {
@@ -232,7 +243,8 @@
       "dependsOn": [
         "storageLoop",
         "[concat('Microsoft.Network/loadBalancers/', variables('loadBalancerName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Compute/virtualMachines/', variables('dcName'))]"
       ],
       "sku": {
         "name": "[parameters('vmSize')]",
@@ -320,109 +332,152 @@
         }
       }
     },
-      {
-          "name": "[variables('dcstorageaccountName')]",
-          "type": "Microsoft.Storage/storageAccounts",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [ ],
-          "tags": {
-              "displayName": "dcstorageaccount"
-          },
-          "properties": {
-              "accountType": "[variables('storageaccountType')]"
-          }
+    {
+      "name": "[variables('dcstorageaccountName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "dcstorageaccount"
       },
-      {
-          "name": "[variables('dcNicName')]",
-          "type": "Microsoft.Network/networkInterfaces",
-          "location": "[variables('location')]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-              "[concat('Microsoft.Network/publicIPAddresses/', variables('dcpublicipName'))]"
-          ],
-          "tags": {
-              "displayName": "dcNic"
-          },
-          "properties": {
-              "ipConfigurations": [
-                  {
-                      "name": "ipconfig1",
-                      "properties": {
-                          "privateIPAllocationMethod": "Dynamic",
-                          "subnet": {
-                              "id": "[variables('dcSubnetRef')]"
-                          },
-                          "publicIPAddress": {
-                              "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('dcpublicipName'))]"
-                          }
-                      }
-                  }
-              ]
-          }
+      "properties": {
+        "accountType": "[variables('storageaccountType')]"
+      }
+    },
+    {
+      "name": "[variables('dcNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[variables('location')]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/publicIPAddresses/', variables('dcpublicipName'))]"
+      ],
+      "tags": {
+        "displayName": "dcNic"
       },
-      {
-          "name": "[parameters('dcName')]",
-          "type": "Microsoft.Compute/virtualMachines",
-          "location": "[variables('location')]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Storage/storageAccounts/', variables('dcstorageaccountName'))]",
-              "[concat('Microsoft.Network/networkInterfaces/', variables('dcNicName'))]"
-          ],
-          "tags": {
-              "displayName": "dc"
-          },
-          "properties": {
-              "hardwareProfile": {
-                  "vmSize": "[parameters('VmSize')]"
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('dcSubnetRef')]"
               },
-            "osProfile": {
-              "computerName": "[parameters('dcName')]",
-              "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]"
-            },
-              "storageProfile": {
-                  "imageReference": {
-                      "publisher": "[variables('dcImagePublisher')]",
-                      "offer": "[variables('dcImageOffer')]",
-                      "sku": "[parameters('dcWindowsOSVersion')]",
-                      "version": "latest"
-                  },
-                  "osDisk": {
-                      "name": "dcOSDisk",
-                      "vhd": {
-                          "uri": "[concat('http://', variables('dcstorageaccountName'), '.blob.core.windows.net/', variables('dcStorageAccountContainerName'), '/', variables('dcOSDiskName'), '.vhd')]"
-                      },
-                      "caching": "ReadWrite",
-                      "createOption": "FromImage"
-                  }
-              },
-              "networkProfile": {
-                  "networkInterfaces": [
-                      {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcNicName'))]"
-                      }
-                  ]
+              "publicIPAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('dcpublicipName'))]"
               }
+            }
           }
+        ]
+      }
+    },
+    {
+      "name": "[variables('dcName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[variables('location')]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('dcstorageaccountName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('dcNicName'))]"
+      ],
+      "tags": {
+        "displayName": "dc"
       },
-      {
-          "name": "[variables('dcpublicipName')]",
-          "type": "Microsoft.Network/publicIPAddresses",
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[parameters('VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[variables('dcName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('dcImagePublisher')]",
+            "offer": "[variables('dcImageOffer')]",
+            "sku": "[parameters('dcWindowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "dcOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('dcstorageaccountName'), '.blob.core.windows.net/', variables('dcStorageAccountContainerName'), '/', variables('dcOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('dcNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "dscDSC",
+          "type": "extensions",
           "location": "[variables('location')]",
           "apiVersion": "2015-06-15",
-          "dependsOn": [ ],
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('dcName'))]"
+          ],
           "tags": {
-              "displayName": "dcpublicip"
+            "displayName": "dscDSC"
           },
           "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDSCConfiguration.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('dscDSCConfigurationFunction')]",
+              "properties": {
+                "nodeName": "[variables('dcName')]",
+                "DomainName": "[variables('domainName')]",
+                "AdminCreds": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:AdminPassword"
+                }
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "AdminPassword": "[parameters('adminPassword')]"
+              }
+            }
+
+          },
+          {
+            "name": "[variables('dcpublicipName')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "location": "[variables('location')]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [ ],
+            "tags": {
+              "displayName": "dcpublicip"
+            },
+            "properties": {
               "publicIPAllocationMethod": "Dynamic",
               "dnsSettings": {
-                  "domainNameLabel": "[parameters('dcpublicipDnsName')]"
+                "domainNameLabel": "[parameters('dcpublicipDnsName')]"
               }
+            }
           }
-      }
+          
+
+        }
+      ]
+    }
   ]
 }
+  
+

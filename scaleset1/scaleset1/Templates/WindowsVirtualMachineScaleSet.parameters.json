@@ -3,13 +3,16 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vmssName": {
-            "value": null
+            "value": "lawman"
         },
         "instanceCount": {
-            "value": null
+            "value": 2
         },
         "adminUsername": {
-            "value": null
+            "value": "lawrance"
+        },
+        "dcpublicipDnsName": {
+            "value": "lawmanlb2"
         }
     }
 }
