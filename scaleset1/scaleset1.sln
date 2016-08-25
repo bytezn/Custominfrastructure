@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "scaleset1", "scaleset1\scaleset1.deployproj", "{D42DEDF4-F441-4719-8104-6ECDC4D79B25}"
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "scaleset1", "scaleset1\scaleset1.deployproj", "{D6BF2560-FE71-4819-972A-1050961D7DF5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{D42DEDF4-F441-4719-8104-6ECDC4D79B25}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{D42DEDF4-F441-4719-8104-6ECDC4D79B25}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{D42DEDF4-F441-4719-8104-6ECDC4D79B25}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{D42DEDF4-F441-4719-8104-6ECDC4D79B25}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D6BF2560-FE71-4819-972A-1050961D7DF5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D6BF2560-FE71-4819-972A-1050961D7DF5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D6BF2560-FE71-4819-972A-1050961D7DF5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D6BF2560-FE71-4819-972A-1050961D7DF5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

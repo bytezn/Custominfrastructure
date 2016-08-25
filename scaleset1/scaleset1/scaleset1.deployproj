@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>d42dedf4-f441-4719-8104-6ecdc4d79b25</ProjectGuid>
+    <ProjectGuid>d6bf2560-fe71-4819-972a-1050961d7df5</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
@@ -36,7 +36,6 @@
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <Content Include="Templates\WindowsVirtualMachineScaleSet.json" />
     <Content Include="Templates\WindowsVirtualMachineScaleSet.parameters.json" />
-    <Content Include="DSC\dscDSCConfiguration.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
