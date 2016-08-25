@@ -97,6 +97,7 @@
     "location": "[resourceGroup().location]",
     "storageAccountType": "Standard_LRS",
     "longNamingInfix": "[toLower(parameters('vmssName'))]",
+    "domainname": "lawrance.com",
     "namingInfix": "[toLower(substring(concat(parameters('vmssName'), uniqueString(resourceGroup().id)), 0, 9))]",
     "newStorageAccountSuffix": "[concat(variables('namingInfix'), 'sa')]",
     "uniqueStringArray": [
@@ -429,35 +430,44 @@
                   ]
               }
           },
-          "resources": [
-              {
-                  "name": "dcDSC",
-                  "type": "extensions",
-                  "location": "[variables('location')]",
-                  "apiVersion": "2015-06-15",
-                  "dependsOn": [
-                      "[concat('Microsoft.Compute/virtualMachines/', parameters('dcName'))]"
-                  ],
-                  "tags": {
-                      "displayName": "dcDSC"
-                  },
-                  "properties": {
-                      "publisher": "Microsoft.Powershell",
-                      "type": "DSC",
-                      "typeHandlerVersion": "2.9",
-                      "autoUpgradeMinorVersion": true,
-                    "settings": {
-                      "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dcDSCConfiguration.ps1.zip')]",
-                      "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                      "configurationFunction": "[variables('dcDSCConfigurationFunction')]",
-                      "properties": {
-                        "nodeName": "[parameters('dcName')]"
-                      }
-                    },
-                      "protectedSettings": { }
+        "resources": [
+          {
+            "name": "dscDC",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('dcname'))]"
+            ],
+            "tags": {
+              "displayName": "dscDC"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dcDSCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('dcDSCConfigurationFunction')]",
+                "properties": {
+                  "nodeName": "[parameters('dcname')]",
+                  "domainName": "[variables('domainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
                   }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
               }
-          ]
+            }
+          }
+        ]
       }
   ]
 }
