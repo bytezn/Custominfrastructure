@@ -3,7 +3,7 @@
     "contentVersion": "1.0.0.0",
     "parameters": {
         "vmssName": {
-            "value": "lawman3"
+            "value": "lawman5"
         },
         "instanceCount": {
             "value": 2
