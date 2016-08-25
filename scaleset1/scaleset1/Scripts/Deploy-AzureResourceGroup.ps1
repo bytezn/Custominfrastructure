@@ -4,13 +4,13 @@
 
 Param(
     [string] [Parameter(Mandatory=$true)] $ResourceGroupLocation,
-    [string] $ResourceGroupName = 'scaleset1',
+    [string] $ResourceGroupName = 'ActiveDirectory-dsccredential',
     [switch] $UploadArtifacts,
     [string] $StorageAccountName,
     [string] $StorageAccountResourceGroupName, 
     [string] $StorageContainerName = $ResourceGroupName.ToLowerInvariant() + '-stageartifacts',
-    [string] $TemplateFile = '..\Templates\WindowsVirtualMachineScaleSet.json',
-    [string] $TemplateParametersFile = '..\Templates\WindowsVirtualMachineScaleSet.parameters.json',
+    [string] $TemplateFile = '..\Templates\WindowsVirtualMachine.json',
+    [string] $TemplateParametersFile = '..\Templates\WindowsVirtualMachine.parameters.json',
     [string] $ArtifactStagingDirectory = '..\bin\Debug\staging',
     [string] $AzCopyPath = '..\Tools\AzCopy.exe',
     [string] $DSCSourceFolder = '..\DSC'
@@ -59,17 +59,30 @@ if ($UploadArtifacts) {
         }
     }
 
-    $StorageAccountKey = (Get-AzureRmStorageAccountKey -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName).Key1
-
+    $StorageAcc = Get-AzureRmStorageAccountKey -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName
+	$StorageAccountKey = "ThXw9KEx7e1y4ui8arZL+EYSiz0CPuLy3+aGYf5vA6X/YVY5SeQsaiTCZET4J5i9b/aNTKRDgEdINVf3DiAm5w=="
     $StorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName).Context
 
-    # Create DSC configuration archive
-    if (Test-Path $DSCSourceFolder) {
-        Add-Type -Assembly System.IO.Compression.FileSystem
-        $ArchiveFile = Join-Path $ArtifactStagingDirectory "dsc.zip"
-        Remove-Item -Path $ArchiveFile -ErrorAction SilentlyContinue
-        [System.IO.Compression.ZipFile]::CreateFromDirectory($DSCSourceFolder, $ArchiveFile)
+    # Copy Configuration Data files into staging directory
+Get-ChildItem $DSCSourceFolder -File -Filter '*.psd1' | Copy-Item -Destination $ArtifactStagingDirectory -Force
+ 
+# Create DSC configuration archive
+ 
+if (Test-Path -Path $DSCSourceFolder)
+{
+    Get-ChildItem -Path $DSCSourceFolder -Filter *.ps1 | ForEach-Object {
+ 
+        $archiveName = $_.BaseName + '.ps1.zip'
+        $archivePath = Join-Path -Path $ArtifactStagingDirectory -ChildPath $archiveName
+         
+        # Create the .ps1.zip file DSC Archive
+        Publish-AzureRmVMDscConfiguration -ConfigurationPath $_.FullName `
+            -OutputArchivePath $archivePath `
+            -Force `
+            -Verbose
     }
+}
+
 
     # Generate the value for artifacts location if it is not provided in the parameter file
     $ArtifactsLocation = $OptionalParameters[$ArtifactsLocationName]

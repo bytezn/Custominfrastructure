@@ -36,6 +36,7 @@
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
     <Content Include="Templates\WindowsVirtualMachineScaleSet.json" />
     <Content Include="Templates\WindowsVirtualMachineScaleSet.parameters.json" />
+    <Content Include="DSC\dcDSCConfiguration.ps1" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="Tools\AzCopy.exe" />
