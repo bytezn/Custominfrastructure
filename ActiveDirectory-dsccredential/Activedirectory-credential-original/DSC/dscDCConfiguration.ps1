@@ -9,8 +9,8 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
- 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XComputerManagement
+	 	 
 Node localhost
     {
         LocalConfigurationManager
@@ -46,7 +46,7 @@ configuration bdc
         [Int]$RetryIntervalSec=30
     ) 
     
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XComputerManagement
     
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
    
@@ -99,10 +99,11 @@ Param (
     [string] $domainName,
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
- 
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
- 
+
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XComputerManagement
+
 Node localhost
+
     {
         LocalConfigurationManager
         {
@@ -141,7 +142,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XComputerManagement
  
 Node localhost
     {
@@ -237,8 +238,10 @@ configuration brokerHost
         [Int]$RetryIntervalSec=30
     ) 
     
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xRemoteDesktopSessionHost
-    
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XComputerManagement, xRemoteDesktopSessionHost
+
+
+ 
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
 
     Node localhost
