@@ -460,8 +460,7 @@
 
         "dnsSettings": {
           "dnsServers": [
-            "8.8.8.8",
-            "10.0.0.44"
+                "10.0.0.44"
           ]
         }
       }
@@ -521,7 +520,7 @@
           "name": "sessiondjdsc",
           "location": "[resourceGroup().location]",
           "dependsOn": [
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+    
             "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]",
             "[concat('Microsoft.Compute/virtualMachines/','session-', copyindex(),'/extensions/sessiondsc')]"
 
@@ -548,8 +547,9 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]"
-          
+            "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]",
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+
           ],
           "tags": {
             "displayName": "sessiondsc"
@@ -687,8 +687,9 @@
             "apiVersion": "2015-06-15",
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'))]",
-              "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'),'/extensions/brokerdjdsc')]"
-             
+              "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'),'/extensions/brokerdjdsc')]",
+              "Microsoft.Compute/virtualMachines/session-1/extensions/sessiondjdsc"
+
 
             ],
             "tags": {
@@ -707,7 +708,7 @@
                   "domainName": "[parameters('domainName')]",
                   "nodeName": "[variables('brokername')]",
                   "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
-                  "sessionhost": "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]",
+                  "sessionhost": "[concat('session-1.',parameters('DomainName'))]",
                   "domainAdminCredentials": {
                     "UserName": "[parameters('adminUserName')]",
                     "Password": "PrivateSettingsRef:Password"

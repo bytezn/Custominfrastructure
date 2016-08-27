@@ -12,7 +12,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "investlb01"
+      "value": "dnsairforce2"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"

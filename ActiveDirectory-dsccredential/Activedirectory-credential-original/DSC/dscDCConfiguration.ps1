@@ -264,6 +264,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
  		ConnectionBroker          = $connectionbroker
  		SessionHost               = $sessionhost
  		WebAccessServer           = $connectionbroker
+		PsDscRunAsCredential      = $domainCreds
          
  	}  
     	 
@@ -274,6 +275,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
   		CollectionDescription     = "my collection"
   		ConnectionBroker          = $connectionbroker
   		DependsOn                 = "[xRDSessionDeployment]mydeployment"
+		PsDscRunAsCredential      = $domainCreds
 
   	}
   
