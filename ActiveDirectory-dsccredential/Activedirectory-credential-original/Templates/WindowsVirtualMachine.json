@@ -24,11 +24,11 @@
         "description": "Username for the Virtual Machine."
       }
     },
-    "numberOfwebInstances": {
+    "numberOfsessionInstances": {
       "type": "int",
       "defaultValue": 2,
       "metadata": {
-        "description": "Number of web instances"
+        "description": "Number of session instances"
       }
     },
 
@@ -89,20 +89,17 @@
     "bdcName": {
       "type": "string",
       "minLength": 1
-    },
-    "fileserver2Name": {
-      "type": "string",
-      "minLength": 1
     }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
+    "brokername": "broker",
     "adNicIPAddress": "10.0.0.44",
     "fsnicipaddress": "10.0.0.56",
     "bdcnicipaddress": "10.0.0.66",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
-    "nicName": "myVMNic",
+    "nicName": "dcnic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
@@ -131,15 +128,20 @@
     "bdcStorageAccountContainerName": "vhds",
     "bdcNicName": "[concat(parameters('bdcName'), 'NetworkInterface')]",
     "dscbdcConfigurationFunction": "dscDCConfiguration.ps1\\bdc",
-    "fileserver2OSDiskName": "fileserver2OSDisk",
-    "fileserverVmSize": "Standard_D1",
-    "fileserver2VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-    "fileserver2StorageAccountContainerName": "vhds",
-    "fileserver2NicName": "[concat(parameters('fileserver2Name'), 'NetworkInterface')]",
     "webOSDiskName": "webOSDisk",
     "webVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "webStorageAccountContainerName": "vhds",
-    "webservicedscConfigurationFunction": "dscDCConfiguration.ps1\\web"
+    "webservicedscConfigurationFunction": "dscDCConfiguration.ps1\\session",
+    "brokerImagePublisher": "MicrosoftWindowsServer",
+    "brokerImageOffer": "WindowsServer",
+    "brokerOSDiskName": "brokerOSDisk",
+    "brokerVmSize": "Standard_D1",
+    "brokerVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "brokerSubnetRef": "[concat(variables('brokerVnetID'), '/subnets/', variables('subnetName'))]",
+    "brokerStorageAccountContainerName": "vhds",
+    "brokerNicName": "[concat(variables('brokerName'), 'NetworkInterface')]",
+    "brokerdscConfigurationFunction": "dscDCConfiguration.ps1\\brokerhost"
+ 
 
 
   },
@@ -431,117 +433,13 @@
       ]
     },
     {
-      "name": "[variables('fileserver2NicName')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "tags": {
-        "displayName": "fileserverNic"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('fsnicipaddress')]",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ],
-
-        "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
-        }
-      }
-    },
-
-    {
-      "name": "[parameters('fileserver2Name')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]"
-      ],
-      "tags": {
-        "displayName": "fileserver"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[parameters('fileserver2Name')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "fileserverOSDisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver2NicName'))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-        {
-          "apiVersion": "2015-06-15",
-          "type": "extensions",
-          "name": "fileserverdj",
-          "location": "[resourceGroup().location]",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
-          ],
-          "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "JsonADDomainExtension",
-            "typeHandlerVersion": "1.0",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "Name": "[parameters('DomainName')]",
-              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-              "Restart": "true",
-              "Options": "3"
-            },
-            "protectedsettings": {
-              "Password": "[parameters('adminPassword')]"
-            }
-          }
-        }
-      ]
-    },
-    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat('web-', copyindex(), '-nic')]",
+      "name": "[concat('session-', copyindex(), '-nic')]",
       "location": "[resourceGroup().location]",
       "copy": {
-        "name": "web-nic-loop",
-        "count": "[parameters('numberOfwebInstances')]"
+        "name": "session-nic-loop",
+        "count": "[parameters('numberOfsessionInstances')]"
       },
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
@@ -561,7 +459,10 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
+          "dnsServers": [
+            "8.8.8.8",
+            "10.0.0.44"
+          ]
         }
       }
     },
@@ -569,15 +470,15 @@
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Compute/virtualMachines",
-      "name": "[concat('web-', copyindex())]",
+      "name": "[concat('session-', copyindex())]",
       "location": "[resourceGroup().location]",
       "copy": {
-        "name": "web-vm-loop",
-        "count": "[parameters('numberOfwebInstances')]"
+        "name": "session-vm-loop",
+        "count": "[parameters('numberOfsessionInstances')]"
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdstorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]"
+        "[concat('Microsoft.Network/networkInterfaces/', 'session-', copyindex(), '-nic')]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -585,7 +486,7 @@
 
         },
         "osProfile": {
-          "computerName": "[concat('web-', copyIndex())]",
+          "computerName": "[concat('session-', copyIndex())]",
           "adminUsername": "[parameters('adminUsername')]",
           "adminPassword": "[parameters('adminPassword')]"
         },
@@ -599,7 +500,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/session-',copyindex(),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -608,7 +509,7 @@
         "networkProfile": {
           "networkInterfaces": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('session-', copyindex(), '-nic'))]"
             }
           ]
         }
@@ -617,11 +518,13 @@
         {
           "apiVersion": "2015-06-15",
           "type": "extensions",
-          "name": "webdsc",
+          "name": "sessiondjdsc",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
+            "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]",
+            "[concat('Microsoft.Compute/virtualMachines/','session-', copyindex(),'/extensions/sessiondsc')]"
+
           ],
           "properties": {
             "publisher": "Microsoft.Compute",
@@ -640,19 +543,16 @@
           }
         },
         {
-          "name": "webservicedsc",
+          "name": "sessiondsc",
           "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-            "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
-
-
+            "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]"
+          
           ],
           "tags": {
-            "displayName": "webservicedscDC"
+            "displayName": "sessiondsc"
           },
           "properties": {
             "publisher": "Microsoft.Powershell",
@@ -680,7 +580,149 @@
         }
       ]
 
-    }
+    },
+      {
+          "name": "[variables('brokerNicName')]",
+          "type": "Microsoft.Network/networkInterfaces",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+          ],
+          "tags": {
+              "displayName": "brokerNic"
+          },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('brokerSubnetRef')]"
+                }
+              }
+            }
+          ],
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.44" ]
+          }
+         }
+        },
+      {
+          "name": "[variables('brokerName')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+              "[concat('Microsoft.Network/networkInterfaces/', variables('brokerNicName'))]"
+          ],
+          "tags": {
+              "displayName": "broker"
+          },
+          "properties": {
+            "hardwareProfile": {
+              "vmSize": "[variables('vmSize')]"
+            },
+            "osProfile": {
+              "computerName": "[variables('brokerName')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
+              "storageProfile": {
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
+                  "osDisk": {
+                      "name": "brokerOSDisk",
+                      "vhd": {
+                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('brokerStorageAccountContainerName'), '/', variables('brokerOSDiskName'), '.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('brokerNicName'))]"
+                      }
+                  ]
+              }
+          },
+        "resources": [
+          {
+            "apiVersion": "2015-06-15",
+            "type": "extensions",
+            "name": "brokerdjdsc",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+              "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'))]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "JsonADDomainExtension",
+              "typeHandlerVersion": "1.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "Name": "[parameters('DomainName')]",
+                "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                "Restart": "true",
+                "Options": "3"
+              },
+              "protectedsettings": {
+                "Password": "[parameters('adminPassword')]"
+              }
+            }
+          },
+          {
+            "name": "brokerdsc",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'))]",
+              "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'),'/extensions/brokerdjdsc')]"
+             
+
+            ],
+            "tags": {
+              "displayName": "brokerdsc"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('brokerdscConfigurationFunction')]",
+                "properties": {
+                  "domainName": "[parameters('domainName')]",
+                  "nodeName": "[variables('brokername')]",
+                  "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
+                  "sessionhost": "[resourceId('Microsoft.Compute/virtualMachines', concat('session-', copyindex()))]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
+              }
+            }
+          }
+        ]
+      }
   ]
   }
   

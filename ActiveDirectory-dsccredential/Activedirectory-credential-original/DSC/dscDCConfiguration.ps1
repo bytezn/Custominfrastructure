@@ -1,4 +1,4 @@
-Configuration web
+Configuration session
 {
  
 [CmdletBinding()]
@@ -15,15 +15,13 @@ Node localhost
     {
         LocalConfigurationManager
         {
-            ConfigurationMode = 'ApplyAndAutoCorrect'
             RebootNodeIfNeeded = $true
-            ActionAfterReboot = 'ContinueConfiguration'
-            AllowModuleOverwrite = $true
+            ConfigurationMode = "ApplyOnly"
         }
  	
-   		WindowsFeature web 
+   		WindowsFeature session 
      	{
- 		Name                      = "web-server"
+ 		Name                      = "RDS-RD-Server"
  		Credential                = $domainAdminCredentials
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true
@@ -214,3 +212,74 @@ Node localhost
         }
     }
 }
+
+configuration brokerHost
+{
+	param 
+    ( 
+        [Parameter(Mandatory)]
+        [String]$DomainName,
+
+		[Parameter(Mandatory)]
+        [String]$nodename,
+
+	    [Parameter(Mandatory)]
+        [String]$connectionbroker,
+
+		[Parameter(Mandatory)]
+        [String]$sessionhost,
+
+		   
+		[Parameter(Mandatory)]
+        [System.Management.Automation.PSCredential]$domainAdmincredentials,
+
+        [Int]$RetryCount=20,
+        [Int]$RetryIntervalSec=30
+    ) 
+    
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xRemoteDesktopSessionHost
+    
+    [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
+
+    Node localhost
+    {
+        LocalConfigurationManager
+        {
+            RebootNodeIfNeeded = $true
+            ConfigurationMode = "ApplyOnly"
+        }
+    
+	WindowsFeature RSAT-RDS-Tools
+        {
+            Ensure = "Present"
+            Name = "RSAT-RDS-Tools"
+            IncludeAllSubFeature = $true
+        }
+		
+ 	xRDSessionDeployment mydeployment 
+ 	{
+ 		ConnectionBroker          = $connectionbroker
+ 		SessionHost               = $sessionhost
+ 		WebAccessServer           = $connectionbroker
+         
+ 	}  
+    	 
+  	xRDSessionCollection mycollection 
+  	{
+  		CollectionName            = "collection"
+  		SessionHost               = $sessionhost
+  		CollectionDescription     = "my collection"
+  		ConnectionBroker          = $connectionbroker
+  		DependsOn                 = "[xRDSessionDeployment]mydeployment"
+
+  	}
+  
+  }
+
+}
+  
+
+  
+ 
+ 
+
