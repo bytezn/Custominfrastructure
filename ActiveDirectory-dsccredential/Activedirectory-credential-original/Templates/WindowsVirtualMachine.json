@@ -713,9 +713,7 @@
                 "properties": {
                   "domainName": "[parameters('domainName')]",
                   "nodeName": "[variables('brokername')]",
-                  "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
-                  "sessionhost": "[concat('session-1.',parameters('DomainName'))]",
-                  "domainAdminCredentials": {
+                    "domainAdminCredentials": {
                     "UserName": "[parameters('adminUserName')]",
                     "Password": "PrivateSettingsRef:Password"
                   }
@@ -857,8 +855,6 @@
                 "properties": {
                   "domainName": "[parameters('domainName')]",
                   "nodeName": "[variables('brokername')]",
-                  "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
-                  "sessionhost": "[concat('session-1.',parameters('DomainName'))]",
                   "domainAdminCredentials": {
                     "UserName": "[parameters('adminUserName')]",
                     "Password": "PrivateSettingsRef:Password"
