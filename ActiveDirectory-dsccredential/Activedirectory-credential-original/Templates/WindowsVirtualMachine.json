@@ -86,7 +86,7 @@
     "imagePublisher": "MicrosoftWindowsServer",
     "brokername": "broker",
     "gatewayname": "gateway",
-    "sessionname": "sessionname",
+    "sessionname": "session",
     "adNicIPAddress": "10.0.0.44",
     "fsnicipaddress": "10.0.0.56",
     "bdcnicipaddress": "10.0.0.66",
@@ -134,29 +134,25 @@
     "brokerStorageAccountContainerName": "vhds",
     "brokerNicName": "[concat(variables('brokerName'), 'NetworkInterface')]",
     "brokerdscConfigurationFunction": "dscDCConfiguration.ps1\\brokerhost",
-      "gatewayImagePublisher": "MicrosoftWindowsServer",
-      "gatewayImageOffer": "WindowsServer",
-      "gatewayOSDiskName": "gatewayOSDisk",
-      "gatewayVmSize": "Standard_D1",
-      "gatewayVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-      "gatewaySubnetRef": "[concat(variables('gatewayVnetID'), '/subnets/', variables('subnetName'))]",
-      "gatewayStorageAccountContainerName": "vhds",
-      "gatewayNicName": "[concat(variables('gatewayName'), 'NetworkInterface')]",
-      "sessionImagePublisher": "MicrosoftWindowsServer",
-      "sessionImageOffer": "WindowsServer",
-      "sessionOSDiskName": "sessionOSDisk",
-      "sessionVmSize": "Standard_D1",
-      "sessionVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-      "sessionSubnetRef": "[concat(variables('sessionVnetID'), '/subnets/', variables('subnetName'))]",
-      "sessionStorageAccountContainerName": "vhds",
-      "sessionNicName": "[concat(variables('sessionName'), 'NetworkInterface')]",
-      "sessiondscConfigurationFunction": "sessiondscConfiguration.ps1\\Main",
-      "gatewaydscConfigurationFunction": "gatewaydscConfiguration.ps1\\Main",
-      "sessiondscdjConfigurationFunction": "sessiondscdjConfiguration.ps1\\Main",
-      "gatewaydscdjConfigurationFunction": "gatewaydscdjConfiguration.ps1\\Main",
-      "sessiondsc2ConfigurationFunction": "sessiondsc2Configuration.ps1\\Main",
-      "sessiondsc3ConfigurationFunction": "sessiondsc3Configuration.ps1\\Main"
- 
+    "gatewayImagePublisher": "MicrosoftWindowsServer",
+    "gatewayImageOffer": "WindowsServer",
+    "gatewayOSDiskName": "gatewayOSDisk",
+    "gatewayVmSize": "Standard_D1",
+    "gatewayVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "gatewaySubnetRef": "[concat(variables('gatewayVnetID'), '/subnets/', variables('subnetName'))]",
+    "gatewayStorageAccountContainerName": "vhds",
+    "gatewayNicName": "[concat(variables('gatewayName'), 'NetworkInterface')]",
+    "sessionImagePublisher": "MicrosoftWindowsServer",
+    "sessionImageOffer": "WindowsServer",
+    "sessionOSDiskName": "sessionOSDisk",
+    "sessionVmSize": "Standard_D1",
+    "sessionVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "sessionSubnetRef": "[concat(variables('sessionVnetID'), '/subnets/', variables('subnetName'))]",
+    "sessionStorageAccountContainerName": "vhds",
+    "sessionNicName": "[concat(variables('sessionName'), 'NetworkInterface')]",
+    "sessioninstallConfigurationFunction": "dscDCConfiguration.ps1\\session",
+    "gatewayinstallConfigurationFunction": "dscDCConfiguration.ps1\\webaccess"
+
 
 
   },
@@ -554,7 +550,8 @@
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'))]",
               "[concat('Microsoft.Compute/virtualMachines/', variables('brokername'),'/extensions/brokerdjdsc')]",
-              "Microsoft.Compute/virtualMachines/session-1/extensions/sessiondjdsc"
+              "Microsoft.Compute/virtualMachines/session/extensions/sessioninstall",
+              "Microsoft.Compute/virtualMachines/gateway/extensions/gatewayinstall"
 
 
             ],
@@ -574,7 +571,8 @@
                   "domainName": "[parameters('domainName')]",
                   "nodeName": "[variables('brokername')]",
                   "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
-                  "sessionhost": "[concat('session-1.',parameters('DomainName'))]",
+                  "webAccessServer": "[concat('gateway.',parameters('DomainName'))]",
+                  "sessionServer": "[concat('session.',parameters('DomainName'))]",
                   "domainAdminCredentials": {
                     "UserName": "[parameters('adminUserName')]",
                     "Password": "PrivateSettingsRef:Password"
@@ -628,9 +626,9 @@
               "displayName": "gateway"
           },
           "properties": {
-              "hardwareProfile": {
-                  "vmSize": "[variables('gatewayVmSize')]"
-              },
+            "hardwareProfile": {
+              "vmSize": "[variables('vmSize')]"
+            },
             "osProfile": {
               "computerName": "[variables('gatewayName')]",
               "adminUsername": "[parameters('adminUsername')]",
@@ -685,6 +683,47 @@
                 "Password": "[parameters('adminPassword')]"
               }
             }
+          },
+          {
+            "name": "gatewayinstall",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', variables('gatewayname'))]",
+              "Microsoft.Compute/virtualMachines/gateway/extensions/gatewaydscdj"
+
+
+            ],
+            "tags": {
+              "displayName": "gatewayinstall"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('gatewayinstallConfigurationFunction')]",
+                "properties": {
+                  "domainName": "[parameters('domainName')]",
+                  "nodeName": "[variables('brokername')]",
+                  "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
+                  "sessionhost": "[concat('session-1.',parameters('DomainName'))]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
+              }
+            }
           }
 
         ]
@@ -727,9 +766,9 @@
               "displayName": "session"
           },
           "properties": {
-              "hardwareProfile": {
-                  "vmSize": "[variables('sessionVmSize')]"
-              },
+            "hardwareProfile": {
+              "vmSize": "[variables('vmSize')]"
+            },
             "osProfile": {
               "computerName": "[variables('sessionname')]",
               "adminUsername": "[parameters('adminUsername')]",
@@ -782,6 +821,47 @@
               },
               "protectedsettings": {
                 "Password": "[parameters('adminPassword')]"
+              }
+            }
+          },
+          {
+            "name": "sessioninstall",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', variables('sessionname'))]",
+              "Microsoft.Compute/virtualMachines/session/extensions/sessiondscdj"
+
+
+            ],
+            "tags": {
+              "displayName": "sessioninstall"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('sessioninstallConfigurationFunction')]",
+                "properties": {
+                  "domainName": "[parameters('domainName')]",
+                  "nodeName": "[variables('brokername')]",
+                  "connectionBroker": "[concat('broker.',parameters('DomainName'))]",
+                  "sessionhost": "[concat('session-1.',parameters('DomainName'))]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
               }
             }
           }

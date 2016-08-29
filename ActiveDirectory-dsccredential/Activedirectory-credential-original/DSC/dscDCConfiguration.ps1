@@ -214,6 +214,34 @@ Node localhost
     }
 }
 
+configuration webaccess
+{
+   param 
+    ( 
+        [Parameter(Mandatory)]
+        [String]$domainName,
+
+        [Parameter(Mandatory)]
+        [PSCredential]$adminCreds
+    ) 
+
+
+    Node localhost
+    {
+        LocalConfigurationManager
+        {
+            RebootNodeIfNeeded = $true
+            ConfigurationMode = "ApplyOnly"
+        }
+
+        WindowsFeature RDS-Web-Access
+        {
+            Ensure = "Present"
+            Name = "RDS-Web-Access"
+        }
+    }
+}
+
 configuration brokerHost
 {
 	param 
@@ -228,8 +256,10 @@ configuration brokerHost
         [String]$connectionbroker,
 
 		[Parameter(Mandatory)]
-        [String]$sessionhost,
+        [String]$sessionserver,
 
+		[Parameter(Mandatory)]
+        [String]$webAccessServer,
 		   
 		[Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$domainAdmincredentials,
@@ -262,8 +292,8 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
  	xRDSessionDeployment mydeployment 
  	{
  		ConnectionBroker          = $connectionbroker
- 		SessionHost               = $sessionhost
- 		WebAccessServer           = $connectionbroker
+ 		SessionHost               = $sessionserver
+ 		WebAccessServer           = $webAccessServer
 		PsDscRunAsCredential      = $domainCreds
          
  	}  
@@ -271,7 +301,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
   	xRDSessionCollection mycollection 
   	{
   		CollectionName            = "collection"
-  		SessionHost               = $sessionhost
+  		SessionHost               = $sessionserver
   		CollectionDescription     = "my collection"
   		ConnectionBroker          = $connectionbroker
   		DependsOn                 = "[xRDSessionDeployment]mydeployment"
