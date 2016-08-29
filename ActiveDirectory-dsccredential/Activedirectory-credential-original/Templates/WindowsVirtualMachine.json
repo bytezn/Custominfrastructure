@@ -80,19 +80,13 @@
     "bdcName": {
       "type": "string",
       "minLength": 1
-    },
-      "gatewayName": {
-          "type": "string",
-          "minLength": 1
-      },
-      "sessionName": {
-          "type": "string",
-          "minLength": 1
-      }
+    }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
     "brokername": "broker",
+    "gatewayname": "gateway",
+    "sessionname": "sessionname",
     "adNicIPAddress": "10.0.0.44",
     "fsnicipaddress": "10.0.0.56",
     "bdcnicipaddress": "10.0.0.66",
@@ -147,7 +141,7 @@
       "gatewayVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
       "gatewaySubnetRef": "[concat(variables('gatewayVnetID'), '/subnets/', variables('subnetName'))]",
       "gatewayStorageAccountContainerName": "vhds",
-      "gatewayNicName": "[concat(parameters('gatewayName'), 'NetworkInterface')]",
+      "gatewayNicName": "[concat(variables('gatewayName'), 'NetworkInterface')]",
       "sessionImagePublisher": "MicrosoftWindowsServer",
       "sessionImageOffer": "WindowsServer",
       "sessionOSDiskName": "sessionOSDisk",
@@ -155,11 +149,13 @@
       "sessionVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
       "sessionSubnetRef": "[concat(variables('sessionVnetID'), '/subnets/', variables('subnetName'))]",
       "sessionStorageAccountContainerName": "vhds",
-      "sessionNicName": "[concat(parameters('sessionName'), 'NetworkInterface')]",
+      "sessionNicName": "[concat(variables('sessionName'), 'NetworkInterface')]",
       "sessiondscConfigurationFunction": "sessiondscConfiguration.ps1\\Main",
       "gatewaydscConfigurationFunction": "gatewaydscConfiguration.ps1\\Main",
       "sessiondscdjConfigurationFunction": "sessiondscdjConfiguration.ps1\\Main",
-      "gatewaydscdjConfigurationFunction": "gatewaydscdjConfiguration.ps1\\Main"
+      "gatewaydscdjConfigurationFunction": "gatewaydscdjConfiguration.ps1\\Main",
+      "sessiondsc2ConfigurationFunction": "sessiondsc2Configuration.ps1\\Main",
+      "sessiondsc3ConfigurationFunction": "sessiondsc3Configuration.ps1\\Main"
  
 
 
@@ -620,7 +616,7 @@
           }
       },
       {
-          "name": "[parameters('gatewayName')]",
+          "name": "[variables('gatewayName')]",
           "type": "Microsoft.Compute/virtualMachines",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
@@ -636,7 +632,7 @@
                   "vmSize": "[variables('gatewayVmSize')]"
               },
             "osProfile": {
-              "computerName": "[parameters('gatewayName')]",
+              "computerName": "[variables('gatewayName')]",
               "adminUsername": "[parameters('adminUsername')]",
               "adminPassword": "[parameters('adminPassword')]"
             },
@@ -672,7 +668,7 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
               "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('gatewayname'))]"
+              "[concat('Microsoft.Compute/virtualMachines/', variables('gatewayname'))]"
             ],
             "properties": {
               "publisher": "Microsoft.Compute",
@@ -719,7 +715,7 @@
           }
       },
       {
-          "name": "[parameters('sessionName')]",
+          "name": "[variables('sessionName')]",
           "type": "Microsoft.Compute/virtualMachines",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
@@ -735,7 +731,7 @@
                   "vmSize": "[variables('sessionVmSize')]"
               },
             "osProfile": {
-              "computerName": "[parameters('sessionName')]",
+              "computerName": "[variables('sessionname')]",
               "adminUsername": "[parameters('adminUsername')]",
               "adminPassword": "[parameters('adminPassword')]"
             },
@@ -771,7 +767,7 @@
             "location": "[resourceGroup().location]",
             "dependsOn": [
               "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('sessionname'))]"
+              "[concat('Microsoft.Compute/virtualMachines/', variables('sessionname'))]"
             ],
             "properties": {
               "publisher": "Microsoft.Compute",
