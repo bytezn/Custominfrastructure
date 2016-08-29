@@ -599,20 +599,23 @@
           "tags": {
               "displayName": "gatewayNic"
           },
-          "properties": {
-              "ipConfigurations": [
-                  {
-                      "name": "ipconfig1",
-                      "properties": {
-                          "privateIPAllocationMethod": "Dynamic",
-                          "subnet": {
-                              "id": "[variables('gatewaySubnetRef')]"
-                          }
-                      }
-                  }
-              ]
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('gatewaySubnetRef')]"
+                }
+              }
+            }
+          ],
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.44" ]
           }
-      },
+          }
+        },
       {
           "name": "[variables('gatewayName')]",
           "type": "Microsoft.Compute/virtualMachines",
@@ -739,20 +742,24 @@
           "tags": {
               "displayName": "sessionNic"
           },
-          "properties": {
-              "ipConfigurations": [
-                  {
-                      "name": "ipconfig1",
-                      "properties": {
-                          "privateIPAllocationMethod": "Dynamic",
-                          "subnet": {
-                              "id": "[variables('sessionSubnetRef')]"
-                          }
-                      }
-                  }
-              ]
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('sessionSubnetRef')]"
+                }
+              }
+            }
+          ],
+
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.44" ]
           }
-      },
+        }
+        },
       {
           "name": "[variables('sessionName')]",
           "type": "Microsoft.Compute/virtualMachines",
