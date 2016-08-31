@@ -9,7 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
  
 Node localhost
     {
@@ -21,19 +21,12 @@ Node localhost
             AllowModuleOverwrite = $true
         }
  
-         WindowsFeature ADPowershell
+         WindowsFeature fileservice
         {
-            Name = "RSAT-AD-PowerShell"
+            Name = "fileandstorage-services"
             Ensure = "Present"
         } 
-
-        xComputer DomainJoin
-        {
-            Name = $NodeName
-            DomainName = $domainName
-            Credential = $domainAdminCredentials
-            DependsOn = "[WindowsFeature]ADPowershell" 
-        }
+		        
      }
 
 }

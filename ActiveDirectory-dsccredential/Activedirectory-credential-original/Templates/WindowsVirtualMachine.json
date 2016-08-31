@@ -85,8 +85,8 @@
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
-    "adNicIPAddress": "10.0.0.4",
-    "fsNicIPAddress": "10.0.0.5",
+    "adNicIPAddress": "10.0.0.44",
+    "fsNicIPAddress": "10.0.0.55",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
@@ -117,8 +117,8 @@
     "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "fileserverStorageAccountContainerName": "vhds",
     "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
-    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver",
-      "sharedscConfigurationFunction": "sharedscConfiguration.ps1\\Main"
+    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver"
+    
   },
   "resources": [
     {
@@ -320,7 +320,7 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.4" ]
+          "dnsServers": [ "10.0.0.44" ]
           
         }  
             
@@ -413,19 +413,16 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
-              "ConfigurationFunction": "Configuration.ps1\\RDSDeployment",
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('fileserverdscConfigurationFunction')]",
               "Properties": {
-                "domainName": "[parameters('adDomainName')]",
-                "adminCreds": {
+                "domainName": "[parameters('DomainName')]",
+                "domainAdminCredentials": {
                   "UserName": "[parameters('adminUsername')]",
                   "Password": "PrivateSettingsRef:adminPassword"
-                },
-                "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
-                "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]",
-                "externalfqdn": "[reference(variables('publicIpRef')).dnsSettings.fqdn]",
-                "sessionHostNamingPrefix": "rdsh-",
-                "numberOfRdshInstances": "[parameters('numberOfRdshInstances')]"
+                }
+
               }
             },
             "protectedSettings": {
