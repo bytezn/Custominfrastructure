@@ -57,7 +57,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
             ActionAfterReboot = 'ContinueConfiguration'            
             ConfigurationMode = 'ApplyOnly'            
             RebootNodeIfNeeded = $true            
-           
+       
       
         }
         WindowsFeature ADDSInstall 
@@ -218,11 +218,9 @@ configuration webaccess
 {
    param 
     ( 
-        [Parameter(Mandatory)]
-        [String]$domainName,
-
-        [Parameter(Mandatory)]
-        [PSCredential]$adminCreds
+        [string] $NodeName,
+        [string] $domainName,
+        [System.Management.Automation.PSCredential]$domainAdmincredentials
     ) 
 
 
@@ -262,15 +260,14 @@ configuration brokerHost
         [String]$webAccessServer,
 		   
 		[Parameter(Mandatory)]
-        [System.Management.Automation.PSCredential]$domainAdmincredentials,
+        [System.Management.Automation.PSCredential]$domainAdmincredentials
 
-        [Int]$RetryCount=20,
-        [Int]$RetryIntervalSec=30
+       
     ) 
     
 Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XComputerManagement, xRemoteDesktopSessionHost
 
-
+	$localhost = [System.Net.Dns]::GetHostByName((hostname)).HostName
  
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
 
@@ -280,6 +277,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
         {
             RebootNodeIfNeeded = $true
             ConfigurationMode = "ApplyOnly"
+		
         }
     
 	WindowsFeature RSAT-RDS-Tools
@@ -288,13 +286,15 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, XActiveDirectory, XC
             Name = "RSAT-RDS-Tools"
             IncludeAllSubFeature = $true
         }
-		
+	
  	xRDSessionDeployment mydeployment 
+
  	{
  		ConnectionBroker          = $connectionbroker
  		SessionHost               = $sessionserver
  		WebAccessServer           = $webAccessServer
 		PsDscRunAsCredential      = $domainCreds
+		DependsOn                 = "[WindowsFeature]RSAT-RDS-Tools" 
          
  	}  
     	 

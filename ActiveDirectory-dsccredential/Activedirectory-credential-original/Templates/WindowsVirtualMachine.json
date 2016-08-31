@@ -712,7 +712,7 @@
                 "configurationFunction": "[variables('gatewayinstallConfigurationFunction')]",
                 "properties": {
                   "domainName": "[parameters('domainName')]",
-                  "nodeName": "[variables('brokername')]",
+                  "nodeName": "[variables('gatewayname')]",
                     "domainAdminCredentials": {
                     "UserName": "[parameters('adminUserName')]",
                     "Password": "PrivateSettingsRef:Password"
