@@ -117,7 +117,8 @@
     "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "fileserverStorageAccountContainerName": "vhds",
     "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
-    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver"
+    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver",
+      "sharedscConfigurationFunction": "sharedscConfiguration.ps1\\Main"
   },
   "resources": [
     {
@@ -394,6 +395,43 @@
             },
             "protectedsettings": {
               "Password": "[parameters('adminPassword')]"
+            }
+          }
+        },
+        {
+          "type": "Microsoft.Compute/virtualMachines/extensions",
+          "name": "filedsc",
+          "apiVersion": "2015-06-15",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'),'/extensions/fileserverdj')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.11",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "ModulesUrl": "[concat(variables('assetLocation'),'/Configuration.zip')]",
+              "ConfigurationFunction": "Configuration.ps1\\RDSDeployment",
+              "Properties": {
+                "domainName": "[parameters('adDomainName')]",
+                "adminCreds": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:adminPassword"
+                },
+                "connectionBroker": "[concat('broker.',parameters('adDomainName'))]",
+                "webAccessServer": "[concat('gateway.',parameters('adDomainName'))]",
+                "externalfqdn": "[reference(variables('publicIpRef')).dnsSettings.fqdn]",
+                "sessionHostNamingPrefix": "rdsh-",
+                "numberOfRdshInstances": "[parameters('numberOfRdshInstances')]"
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "adminPassword": "[parameters('adminPassword')]"
+              }
             }
           }
         }
