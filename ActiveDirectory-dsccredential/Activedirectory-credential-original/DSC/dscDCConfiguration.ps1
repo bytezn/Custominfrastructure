@@ -9,7 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare
  
 Node localhost
     {
@@ -26,6 +26,29 @@ Node localhost
             Name = "fileandstorage-services"
             Ensure = "Present"
         } 
+         
+      	File filename
+      	{
+      		DestinationPath           = "c:\1\2.txt"
+      		Contents                  = "myfile"
+      		DependsOn                 = "[WindowsFeature]fileservice"
+      		Ensure                    = "Present"
+      		Force                     = $true
+      		PsDscRunAsCredential      = $domainAdminCredentials
+      		Type                      = "File"
+      	}
+                    
+        xSmbShare myshare 
+        	{
+        		Name                      = "myshare"
+        		Path                      = "c:\1"
+        		DependsOn                 = "[File]filename"
+        		Ensure                    = "Present"
+        		FolderEnumerationMode     = "Unrestricted"
+        		FullAccess                = "administrator"
+        		PsDscRunAsCredential      = $domainAdminCredentials
+        	}
+     
 		        
      }
 
