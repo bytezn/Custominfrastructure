@@ -399,8 +399,8 @@
           }
         },
         {
-          "type": "Microsoft.Compute/virtualMachines/extensions",
-          "name": "filedsc",
+          "type": "extensions",
+          "name": "fileserverdsc",
           "apiVersion": "2015-06-15",
           "location": "[resourceGroup().location]",
           "dependsOn": [
