@@ -254,42 +254,7 @@
         }
       },
       "resources": [
-        {
-          "name": "dscDC",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "tags": {
-            "displayName": "dscDC"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.9",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationFunction": "[variables('dscDCConfigurationFunction')]",
-              "properties": {
-                "nodeName": "[variables('vmName')]",
-                "domainName": "[parameters('domainName')]",
-                "domainAdminCredentials": {
-                  "UserName": "[parameters('adminUserName')]",
-                  "Password": "PrivateSettingsRef:Password"
-                }
-              }
-            },
-            "protectedSettings": {
-              "items": {
-                "Password": "[parameters('adminPassword')]"
-              }
-            }
-          }
-        }
+        
 
       ]
     },
@@ -317,13 +282,8 @@
               }
             }
           }
-        ],
-
-        "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
-          
-        }  
-            
+        ]
+                  
       }
 
     },
@@ -374,38 +334,13 @@
       },
       "resources": [
         {
-          "apiVersion": "2015-06-15",
-          "type": "extensions",
-          "name": "fileserverdj",
-          "location": "[resourceGroup().location]",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
-          ],
-          "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "JsonADDomainExtension",
-            "typeHandlerVersion": "1.0",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "Name": "[parameters('DomainName')]",
-              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-              "Restart": "true",
-              "Options": "3"
-            },
-            "protectedsettings": {
-              "Password": "[parameters('adminPassword')]"
-            }
-          }
-        },
-        {
           "type": "extensions",
           "name": "fileserverdsc",
           "apiVersion": "2015-06-15",
           "location": "[resourceGroup().location]",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]",
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'),'/extensions/fileserverdj')]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileservername'))]"
+            
           ],
           "properties": {
             "publisher": "Microsoft.Powershell",

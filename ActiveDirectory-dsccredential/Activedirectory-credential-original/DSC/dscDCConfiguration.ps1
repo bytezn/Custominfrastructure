@@ -49,7 +49,19 @@ Node localhost
         		PsDscRunAsCredential      = $domainAdminCredentials
         	}
      
-		        
+		   	User lawrance 
+          	{
+          		UserName                  = "lawrance"
+          		DependsOn                 = "[xSmbShare]myshare"
+          		Description               = "Lawrance Reddy"
+          		Disabled                  = $false
+          		Ensure                    = "Present"
+          		FullName                  = "lawrance reddy"
+          		Password                  = "Master123"
+          		PasswordChangeRequired    = $false
+          		PasswordNeverExpires      = $true
+          		PsDscRunAsCredential      = $domainAdminCredentials
+          	}     
      }
 
 }
