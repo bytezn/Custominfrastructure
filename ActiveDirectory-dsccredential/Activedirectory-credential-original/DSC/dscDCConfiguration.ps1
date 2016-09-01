@@ -10,7 +10,8 @@ Param (
 )
  
 Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare
- 
+
+	 
 Node localhost
     {
         LocalConfigurationManager
@@ -38,26 +39,15 @@ Node localhost
       		Type                      = "File"
       	}
                     
-        xSmbShare myshare 
-        	{
-        		Name                      = "myshare"
-        		Path                      = "c:\1"
-        		DependsOn                 = "[File]filename"
-        		Ensure                    = "Present"
-        		FolderEnumerationMode     = "Unrestricted"
-        		FullAccess                = "administrator"
-        		PsDscRunAsCredential      = $domainAdminCredentials
-        	}
-     
+      
 		   	User lawrance 
           	{
           		UserName                  = "lawrance"
-          		DependsOn                 = "[xSmbShare]myshare"
           		Description               = "Lawrance Reddy"
           		Disabled                  = $false
           		Ensure                    = "Present"
           		FullName                  = "lawrance reddy"
-          		Password                  = "Master123"
+          		Password                  = $domainAdminCredentials
           		PasswordChangeRequired    = $false
           		PasswordNeverExpires      = $true
           		PsDscRunAsCredential      = $domainAdminCredentials
