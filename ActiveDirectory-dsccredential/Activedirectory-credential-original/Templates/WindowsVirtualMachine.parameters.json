@@ -9,7 +9,7 @@
       "value": "Master123"
     },
     "domainName": {
-      "value": "contoso.com"
+      "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
       "value": "jgate1"
@@ -24,7 +24,7 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "bdc070"
+          "value": "bdc0703"
       },
       "fileserver2Name": {
           "value": "joshgatefs"
