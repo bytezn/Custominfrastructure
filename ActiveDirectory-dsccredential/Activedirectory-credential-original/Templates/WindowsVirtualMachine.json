@@ -13,6 +13,91 @@
       "type": "securestring",
       "metadata": {
         "description": "Password for the Virtual Machine."
+        }
+      },
+
+      "vaultName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the Recovery Services Vault"
+        }
+      },
+      "policyName": {
+        "type": "string",
+        "metadata": {
+          "description": "Name of the Backup Policy"
+        }
+      },
+      "scheduleRunDays": {
+        "type": "array",
+        "metadata": {
+          "description": "Backup Schedule will run on array of Days like, Monday, Tuesday etc. Applies in Weekly Backup Type only."
+        }
+      },
+      "scheduleRunTimes": {
+        "type": "array",
+        "metadata": {
+          "description": "Times in day when backup should be triggered. e.g. 01:00, 13:00. This will be used in LTR too for daily, weekly, monthly and yearly backup."
+        }
+      },
+      "weeklyRetentionDurationCount": {
+        "type": "int",
+        "metadata": {
+          "description": "Number of weeks you want to retain the backup"
+        }
+      },
+      "daysOfTheWeekForMontlyRetention": {
+        "type": "array",
+        "metadata": {
+          "description": "Array of Days for Monthly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
+        }
+      },
+      "weeksOfTheMonthForMonthlyRetention": {
+        "type": "array",
+        "metadata": {
+          "description": "Array of Weeks for Monthly Retention - First, Second, Third, Fourth, Last"
+        }
+      },
+      "monthlyRetentionDurationCount": {
+        "type": "int",
+        "metadata": {
+          "description": "Number of months you want to retain the backup"
+        }
+      },
+      "monthsOfYear": {
+        "type": "array",
+        "metadata": {
+          "description": "Array of Months for Yearly Retention"
+        }
+      },
+      "daysOfTheWeekForYearlyRetention": {
+        "type": "array",
+        "metadata": {
+          "description": "Array of Days for Yearly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
+        }
+      },
+      "weeksOfTheMonthForYearlyRetention": {
+        "type": "array",
+        "metadata": {
+          "description": "Array of Weeks for Yearly Retention - First, Second, Third, Fourth, Last"
+        }
+      },
+      "yearlyRetentionDurationCount": {
+        "type": "int",
+        "metadata": {
+          "description": "Number of years you want to retain the backup"
+        }
+      },
+        
+    "skuName": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [
+        "Standard",
+        "Premium"
+      ],
+      "metadata": {
+        "description": "SKU for the vault"
       }
     },
     "domainName": {
@@ -39,19 +124,6 @@
       ],
       "metadata": {
         "description": "The Windows version for the VM. This will pick a fully patched image of this given Windows version. Allowed values: 2008-R2-SP1, 2012-Datacenter, 2012-R2-Datacenter."
-      }
-    },
-
-    "_artifactsLocation": {
-      "type": "string",
-      "metadata": {
-        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
-      }
-    },
-    "_artifactsLocationSasToken": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Auto-generated token to access _artifactsLocation"
       }
     }
   },
@@ -96,7 +168,95 @@
       "properties": {
         "accountType": "[variables('vhdStorageType')]"
       }
+
     },
+
+    {
+      "type": "Microsoft.RecoveryServices/vaults",
+      "apiVersion": "2015-11-10",
+      "name": "[parameters('vaultName')]",
+      "location": "[resourceGroup().location]",
+      "sku": {
+        "name": "RS0",
+        "tier": "Standard"
+      },
+      "properties": {
+      }
+    },
+      {
+        "apiVersion": "2015-11-10",
+        "name": "[concat(parameters('vaultName'), '/', parameters('policyName'))]",
+        "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+        "dependsOn": [ "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]" ],
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "backupManagementType": "AzureIaasVM",
+		    "schedulePolicy": {
+            "scheduleRunFrequency": "Weekly",
+            "scheduleRunDays": "[parameters('scheduleRunDays')]",
+            "scheduleRunTimes": "[parameters('scheduleRunTimes')]",
+            "scheduleRunTimesNew": [ ],
+            "schedulePolicyType": "SimpleSchedulePolicy"
+          },
+          "retentionPolicy": {
+            "dailySchedule": null,
+            "weeklySchedule": {
+              "daysOfTheWeek": "[parameters('scheduleRunDays')]",
+              "retentionTimes": "[parameters('scheduleRunTimes')]",
+              "retentionTimesNew": [ ],
+              "retentionDuration": {
+                "count": "[parameters('weeklyRetentionDurationCount')]",
+                "durationType": "Weeks"
+              }
+            },
+            "monthlySchedule": {
+              "retentionScheduleFormatType": "Weekly",
+              "retentionScheduleDaily": {
+                "daysOfTheMonth": [
+                  {
+                    "date": 1,
+                    "isLast": false
+                  }
+                ]
+              },
+              "retentionScheduleWeekly": {
+                "daysOfTheWeek": "[parameters('daysOfTheWeekForMontlyRetention')]",
+                "weeksOfTheMonth": "[parameters('weeksOfTheMonthForMonthlyRetention')]"
+              },
+              "retentionTimes": "[parameters('scheduleRunTimes')]",
+              "retentionTimesNew": [ ],
+              "retentionDuration": {
+                "count": "[parameters('monthlyRetentionDurationCount')]",
+                "durationType": "Months"
+              }
+            },
+            "yearlySchedule": {
+              "retentionScheduleFormatType": "Weekly", 
+			  "monthsOfYear": "[parameters('monthsOfYear')]",
+              "retentionScheduleDaily": {
+                "daysOfTheMonth": [
+                  {
+                    "date": 1,
+                    "isLast": false
+                  }
+                ]
+              },
+              "retentionScheduleWeekly": {
+                "daysOfTheWeek": "[parameters('daysOfTheWeekForYearlyRetention')]",
+                "weeksOfTheMonth": "[parameters('weeksOfTheMonthForYearlyRetention')]"
+              },
+              "retentionTimes": "[parameters('scheduleRunTimes')]",
+              "retentionTimesNew": [ ],
+              "retentionDuration": {
+                "count": "[parameters('yearlyRetentionDurationCount')]",
+                "durationType": "Years"
+              }
+            },
+            "retentionPolicyType": "LongTermRetentionPolicy"
+          }
+        }
+      },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
@@ -217,70 +377,7 @@
         }
       },
       "resources": [
-        {
-          "type": "extensions",
-          "name": "Microsoft.Insights.VMDiagnosticsSettings",
-          "apiVersion": "2015-06-15",
-          "location": "[resourceGroup().location]",
-          "tags": {
-            "displayName": "AzureDiagnostics"
-          },
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "properties": {
-            "publisher": "Microsoft.Azure.Diagnostics",
-            "type": "IaaSDiagnostics",
-            "typeHandlerVersion": "1.5",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "xmlCfg": "[base64(concat(variables('wadcfgxstart'), variables('wadmetricsresourceid'), variables('wadcfgxend')))]",
-              "storageAccount": "[variables('diagnosticsStorageAccountName')]"
-            },
-            "protectedSettings": {
-              "storageAccountName": "[variables('diagnosticsStorageAccountName')]",
-              "storageAccountKey": "[listkeys(variables('accountid'), '2015-06-15').key1]",
-              "storageAccountEndPoint": "https://core.windows.net"
-            }
-          }
-        },
-        {
-          "name": "dscDC",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "tags": {
-            "displayName": "dscDC"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.9",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationFunction": "[variables('dscDCConfigurationFunction')]",
-              "properties": {
-                "nodeName": "[variables('vmName')]",
-                "domainName": "[parameters('domainName')]",
-                "domainAdminCredentials": {
-                  "UserName": "[parameters('adminUserName')]",
-                  "Password": "PrivateSettingsRef:Password"
-                }
-              }
-            },
-            "protectedSettings": {
-              "items": {
-                "Password": "[parameters('adminPassword')]"
-              },
-              "DataBlobUri": "[concat(parameters('_artifactsLocation'), '/dscDCConfigData.psd1')]"
-            }
-          }
-        }
+        
 
       ]
     }
