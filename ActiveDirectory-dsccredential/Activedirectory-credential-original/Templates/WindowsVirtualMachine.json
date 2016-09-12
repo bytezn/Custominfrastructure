@@ -131,6 +131,8 @@
     "imagePublisher": "MicrosoftWindowsServer",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
+    "backupFabric": "Azure",
+    "protectedItemType": "Microsoft.ClassicCompute/virtualMachines",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
@@ -154,7 +156,11 @@
     "wadcfgxstart": "[concat(variables('wadlogs'), variables('wadperfcounters1'), variables('wadperfcounters2'), '<Metrics resourceId=\"')]",
     "wadmetricsresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('diagnosticsStorageAccountResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmName'))]",
     "wadcfgxend": "><MetricAggregation scheduledTransferPeriod=\"PT1H\"/><MetricAggregation scheduledTransferPeriod=\"PT1M\"/></Metrics></DiagnosticMonitorConfiguration></WadCfg>",
-    "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main"
+    "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main",
+    "resourcegroup": "[resourceGroup().name]",
+    "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
+    "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]"
+
   },
   "resources": [
     {
@@ -183,79 +189,94 @@
       "properties": {
       }
     },
-      {
-        "apiVersion": "2015-11-10",
-        "name": "[concat(parameters('vaultName'), '/', parameters('policyName'))]",
-        "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
-        "dependsOn": [ "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]" ],
-        "location": "[resourceGroup().location]",
-        "properties": {
-          "backupManagementType": "AzureIaasVM",
-		    "schedulePolicy": {
-            "scheduleRunFrequency": "Weekly",
-            "scheduleRunDays": "[parameters('scheduleRunDays')]",
-            "scheduleRunTimes": "[parameters('scheduleRunTimes')]",
-            "scheduleRunTimesNew": [ ],
-            "schedulePolicyType": "SimpleSchedulePolicy"
+    {
+      "apiVersion": "2015-11-10",
+      "name": "[concat(parameters('vaultName'), '/', parameters('policyName'))]",
+      "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+      "dependsOn": [ "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]" ],
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "backupManagementType": "AzureIaasVM",
+        "schedulePolicy": {
+          "scheduleRunFrequency": "Weekly",
+          "scheduleRunDays": "[parameters('scheduleRunDays')]",
+          "scheduleRunTimes": "[parameters('scheduleRunTimes')]",
+          "scheduleRunTimesNew": [ ],
+          "schedulePolicyType": "SimpleSchedulePolicy"
+        },
+        "retentionPolicy": {
+          "dailySchedule": null,
+          "weeklySchedule": {
+            "daysOfTheWeek": "[parameters('scheduleRunDays')]",
+            "retentionTimes": "[parameters('scheduleRunTimes')]",
+            "retentionTimesNew": [ ],
+            "retentionDuration": {
+              "count": "[parameters('weeklyRetentionDurationCount')]",
+              "durationType": "Weeks"
+            }
           },
-          "retentionPolicy": {
-            "dailySchedule": null,
-            "weeklySchedule": {
-              "daysOfTheWeek": "[parameters('scheduleRunDays')]",
-              "retentionTimes": "[parameters('scheduleRunTimes')]",
-              "retentionTimesNew": [ ],
-              "retentionDuration": {
-                "count": "[parameters('weeklyRetentionDurationCount')]",
-                "durationType": "Weeks"
-              }
+          "monthlySchedule": {
+            "retentionScheduleFormatType": "Weekly",
+            "retentionScheduleDaily": {
+              "daysOfTheMonth": [
+                {
+                  "date": 1,
+                  "isLast": false
+                }
+              ]
             },
-            "monthlySchedule": {
-              "retentionScheduleFormatType": "Weekly",
-              "retentionScheduleDaily": {
-                "daysOfTheMonth": [
-                  {
-                    "date": 1,
-                    "isLast": false
-                  }
-                ]
-              },
-              "retentionScheduleWeekly": {
-                "daysOfTheWeek": "[parameters('daysOfTheWeekForMontlyRetention')]",
-                "weeksOfTheMonth": "[parameters('weeksOfTheMonthForMonthlyRetention')]"
-              },
-              "retentionTimes": "[parameters('scheduleRunTimes')]",
-              "retentionTimesNew": [ ],
-              "retentionDuration": {
-                "count": "[parameters('monthlyRetentionDurationCount')]",
-                "durationType": "Months"
-              }
+            "retentionScheduleWeekly": {
+              "daysOfTheWeek": "[parameters('daysOfTheWeekForMontlyRetention')]",
+              "weeksOfTheMonth": "[parameters('weeksOfTheMonthForMonthlyRetention')]"
             },
-            "yearlySchedule": {
-              "retentionScheduleFormatType": "Weekly", 
-			  "monthsOfYear": "[parameters('monthsOfYear')]",
-              "retentionScheduleDaily": {
-                "daysOfTheMonth": [
-                  {
-                    "date": 1,
-                    "isLast": false
-                  }
-                ]
-              },
-              "retentionScheduleWeekly": {
-                "daysOfTheWeek": "[parameters('daysOfTheWeekForYearlyRetention')]",
-                "weeksOfTheMonth": "[parameters('weeksOfTheMonthForYearlyRetention')]"
-              },
-              "retentionTimes": "[parameters('scheduleRunTimes')]",
-              "retentionTimesNew": [ ],
-              "retentionDuration": {
-                "count": "[parameters('yearlyRetentionDurationCount')]",
-                "durationType": "Years"
-              }
+            "retentionTimes": "[parameters('scheduleRunTimes')]",
+            "retentionTimesNew": [ ],
+            "retentionDuration": {
+              "count": "[parameters('monthlyRetentionDurationCount')]",
+              "durationType": "Months"
+            }
+          },
+          "yearlySchedule": {
+            "retentionScheduleFormatType": "Weekly",
+            "monthsOfYear": "[parameters('monthsOfYear')]",
+            "retentionScheduleDaily": {
+              "daysOfTheMonth": [
+                {
+                  "date": 1,
+                  "isLast": false
+                }
+              ]
             },
-            "retentionPolicyType": "LongTermRetentionPolicy"
-          }
+            "retentionScheduleWeekly": {
+              "daysOfTheWeek": "[parameters('daysOfTheWeekForYearlyRetention')]",
+              "weeksOfTheMonth": "[parameters('weeksOfTheMonthForYearlyRetention')]"
+            },
+            "retentionTimes": "[parameters('scheduleRunTimes')]",
+            "retentionTimesNew": [ ],
+            "retentionDuration": {
+              "count": "[parameters('yearlyRetentionDurationCount')]",
+              "durationType": "Years"
+            }
+          },
+          "retentionPolicyType": "LongTermRetentionPolicy"
         }
+      }
+    },
+
+    {
+      "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container')[copyIndex()], '/', variables('vmcontainer')[copyIndex()])]",
+      "apiVersion": "2015-11-10",
+      "location": "[resourceGroup().location]",
+      "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+      "copy": {
+        "name": "protectedItemsCopy",
+        "count": "[length(variables('vmcontainer'))]"
       },
+      "properties": {
+        "protectedItemType": "[variables('protectedItemType')]",
+        "policyName": "[parameters('policyName')]"
+      }
+    },
 
     {
       "apiVersion": "2015-06-15",
@@ -377,7 +398,7 @@
         }
       },
       "resources": [
-        
+
 
       ]
     }

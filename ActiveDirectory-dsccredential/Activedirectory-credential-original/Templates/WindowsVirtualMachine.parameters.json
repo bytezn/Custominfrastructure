@@ -12,16 +12,16 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "blog3212343"
+      "value": "bloggeress"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
       "vaultName": {
-          "value": "myvva"
+          "value": "myprotect1"
       },
       "policyName": {
-          "value": "mypolic"
+          "value": "mypolicy"
       },
       "scheduleRunDays": {
           "value": [
