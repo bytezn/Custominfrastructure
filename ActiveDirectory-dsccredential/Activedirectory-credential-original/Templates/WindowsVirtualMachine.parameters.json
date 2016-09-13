@@ -9,16 +9,16 @@
       "value": "Master123"
     },
      "dnsNameForPublicIP": {
-      "value": "tridentlb2"
+      "value": "tridentlb2455"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
       "vaultName": {
-          "value": "myvault"
+          "value": "myvault36"
       },
       "policyName": {
-          "value": "mypolicy"
+          "value": "mypolicye76"
       },
       "scheduleRunDays": {
           "value": [

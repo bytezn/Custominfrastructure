@@ -193,7 +193,7 @@
       "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
       "dependsOn": [
         "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]"
-             
+        
       ],
       "location": "[resourceGroup().location]",
       "properties": {
@@ -268,8 +268,7 @@
       "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container'), '/', variables('vmcontainer'))]",
       "apiVersion": "2015-11-10",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
-        "[concat(parameters('vaultName'), '/', parameters('policyName'))]"
+        "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]"
       ],
       "location": "[resourceGroup().location]",
       "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
