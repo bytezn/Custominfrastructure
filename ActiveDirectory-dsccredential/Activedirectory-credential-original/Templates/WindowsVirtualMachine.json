@@ -175,6 +175,9 @@
     {
       "type": "Microsoft.RecoveryServices/vaults",
       "apiVersion": "2015-11-10",
+      "dependson": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ],
       "name": "[parameters('vaultName')]",
       "location": "[resourceGroup().location]",
       "sku": {
@@ -188,7 +191,10 @@
       "apiVersion": "2015-11-10",
       "name": "[concat(parameters('vaultName'), '/', parameters('policyName'))]",
       "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
-      "dependsOn": [ "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]" ],
+      "dependsOn": [
+        "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]"
+             
+      ],
       "location": "[resourceGroup().location]",
       "properties": {
         "backupManagementType": "AzureIaasVM",
@@ -262,7 +268,8 @@
       "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container'), '/', variables('vmcontainer'))]",
       "apiVersion": "2015-11-10",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]",
+        "[concat(parameters('vaultName'), '/', parameters('policyName'))]"
       ],
       "location": "[resourceGroup().location]",
       "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
