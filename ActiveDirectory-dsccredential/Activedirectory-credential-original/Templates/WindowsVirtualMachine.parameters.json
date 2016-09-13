@@ -8,17 +8,14 @@
     "adminPassword": {
       "value": "Master123"
     },
-    "domainName": {
-      "value": "contoso.com"
-    },
-    "dnsNameForPublicIP": {
-      "value": "bloggeress"
+     "dnsNameForPublicIP": {
+      "value": "myvaultlbs"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
       "vaultName": {
-          "value": "myprotect1"
+          "value": "myvault"
       },
       "policyName": {
           "value": "mypolicy"

@@ -13,82 +13,88 @@
       "type": "securestring",
       "metadata": {
         "description": "Password for the Virtual Machine."
-        }
-      },
+      }
+    },
 
-      "vaultName": {
-        "type": "string",
-        "metadata": {
-          "description": "Name of the Recovery Services Vault"
-        }
-      },
-      "policyName": {
-        "type": "string",
-        "metadata": {
-          "description": "Name of the Backup Policy"
-        }
-      },
-      "scheduleRunDays": {
-        "type": "array",
-        "metadata": {
-          "description": "Backup Schedule will run on array of Days like, Monday, Tuesday etc. Applies in Weekly Backup Type only."
-        }
-      },
-      "scheduleRunTimes": {
-        "type": "array",
-        "metadata": {
-          "description": "Times in day when backup should be triggered. e.g. 01:00, 13:00. This will be used in LTR too for daily, weekly, monthly and yearly backup."
-        }
-      },
-      "weeklyRetentionDurationCount": {
-        "type": "int",
-        "metadata": {
-          "description": "Number of weeks you want to retain the backup"
-        }
-      },
-      "daysOfTheWeekForMontlyRetention": {
-        "type": "array",
-        "metadata": {
-          "description": "Array of Days for Monthly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
-        }
-      },
-      "weeksOfTheMonthForMonthlyRetention": {
-        "type": "array",
-        "metadata": {
-          "description": "Array of Weeks for Monthly Retention - First, Second, Third, Fourth, Last"
-        }
-      },
-      "monthlyRetentionDurationCount": {
-        "type": "int",
-        "metadata": {
-          "description": "Number of months you want to retain the backup"
-        }
-      },
-      "monthsOfYear": {
-        "type": "array",
-        "metadata": {
-          "description": "Array of Months for Yearly Retention"
-        }
-      },
-      "daysOfTheWeekForYearlyRetention": {
-        "type": "array",
-        "metadata": {
-          "description": "Array of Days for Yearly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
-        }
-      },
-      "weeksOfTheMonthForYearlyRetention": {
-        "type": "array",
-        "metadata": {
-          "description": "Array of Weeks for Yearly Retention - First, Second, Third, Fourth, Last"
-        }
-      },
-      "yearlyRetentionDurationCount": {
-        "type": "int",
-        "metadata": {
-          "description": "Number of years you want to retain the backup"
-        }
-      },
-        
+    "vaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Recovery Services Vault"
+      }
+    },
+     "vaultsource": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Recovery Vault Resource Group"
+      }
+    },
+    "policyName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Backup Policy"
+      }
+    },
+    "scheduleRunDays": {
+      "type": "array",
+      "metadata": {
+        "description": "Backup Schedule will run on array of Days like, Monday, Tuesday etc. Applies in Weekly Backup Type only."
+      }
+    },
+    "scheduleRunTimes": {
+      "type": "array",
+      "metadata": {
+        "description": "Times in day when backup should be triggered. e.g. 01:00, 13:00. This will be used in LTR too for daily, weekly, monthly and yearly backup."
+      }
+    },
+    "weeklyRetentionDurationCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of weeks you want to retain the backup"
+      }
+    },
+    "daysOfTheWeekForMontlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Days for Monthly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
+      }
+    },
+    "weeksOfTheMonthForMonthlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Weeks for Monthly Retention - First, Second, Third, Fourth, Last"
+      }
+    },
+    "monthlyRetentionDurationCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of months you want to retain the backup"
+      }
+    },
+    "monthsOfYear": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Months for Yearly Retention"
+      }
+    },
+    "daysOfTheWeekForYearlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Days for Yearly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
+      }
+    },
+    "weeksOfTheMonthForYearlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Weeks for Yearly Retention - First, Second, Third, Fourth, Last"
+      }
+    },
+    "yearlyRetentionDurationCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of years you want to retain the backup"
+      }
+    },
+
     "skuName": {
       "type": "string",
       "defaultValue": "Standard",
@@ -98,13 +104,6 @@
       ],
       "metadata": {
         "description": "SKU for the vault"
-      }
-    },
-    "domainName": {
-      "type": "string",
-      "minLength": 1,
-      "metadata": {
-        "description": "Domain Name for the Forest."
       }
     },
     "dnsNameForPublicIP": {
@@ -159,7 +158,8 @@
     "dscDCConfigurationFunction": "dscDCConfiguration.ps1\\Main",
     "resourcegroup": "[resourceGroup().name]",
     "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
-    "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]"
+    "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
+    "vmresourceid": "[resourceid('Microsoft.Compute/virtualMachines/', variables('vmname'))]"
 
   },
   "resources": [
@@ -264,20 +264,18 @@
     },
 
     {
-      "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container')[copyIndex()], '/', variables('vmcontainer')[copyIndex()])]",
+      "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container'), '/', variables('vmcontainer'))]",
       "apiVersion": "2015-11-10",
       "location": "[resourceGroup().location]",
       "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
-      "copy": {
-        "name": "protectedItemsCopy",
-        "count": "[length(variables('vmcontainer'))]"
-      },
       "properties": {
         "protectedItemType": "[variables('protectedItemType')]",
-        "policyName": "[parameters('policyName')]"
+        "policyName": "[parameters('policyName')]",
+        "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', parameters('VaultName'), parameters('PolicyName'))]",
+        "sourceResourceId": "[variables('vmresourceid')"
       }
     },
-
+    
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/publicIPAddresses",
