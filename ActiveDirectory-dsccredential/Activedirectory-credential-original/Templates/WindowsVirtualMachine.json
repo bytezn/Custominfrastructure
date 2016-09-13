@@ -22,13 +22,7 @@
         "description": "Name of the Recovery Services Vault"
       }
     },
-     "vaultsource": {
-      "type": "string",
-      "metadata": {
-        "description": "Name of the Recovery Vault Resource Group"
-      }
-    },
-    "policyName": {
+     "policyName": {
       "type": "string",
       "metadata": {
         "description": "Name of the Backup Policy"
@@ -159,7 +153,8 @@
     "resourcegroup": "[resourceGroup().name]",
     "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
     "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
-    "vmresourceid": "[resourceid('Microsoft.Compute/virtualMachines/', variables('vmname'))]"
+    "vmresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('ResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmname'))]"
+
 
   },
   "resources": [
@@ -266,13 +261,16 @@
     {
       "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container'), '/', variables('vmcontainer'))]",
       "apiVersion": "2015-11-10",
+      "dependsOn": [
+        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+      ],
       "location": "[resourceGroup().location]",
       "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
       "properties": {
         "protectedItemType": "[variables('protectedItemType')]",
         "policyName": "[parameters('policyName')]",
         "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', parameters('VaultName'), parameters('PolicyName'))]",
-        "sourceResourceId": "[variables('vmresourceid')"
+        "sourceResourceId": "[variables('vmresourceid')]"
       }
     },
     

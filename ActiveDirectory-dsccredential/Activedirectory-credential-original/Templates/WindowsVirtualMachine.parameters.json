@@ -9,7 +9,7 @@
       "value": "Master123"
     },
      "dnsNameForPublicIP": {
-      "value": "myvaultlbs"
+      "value": "mysendlb3"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
