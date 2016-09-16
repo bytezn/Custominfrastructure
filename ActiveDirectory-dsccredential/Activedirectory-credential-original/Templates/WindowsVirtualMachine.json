@@ -24,6 +24,92 @@
         "description": "Username for the Virtual Machine."
       }
     },
+
+    "vaultName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Recovery Services Vault"
+      }
+    },
+    "policyName": {
+      "type": "string",
+      "metadata": {
+        "description": "Name of the Backup Policy"
+      }
+    },
+    "scheduleRunDays": {
+      "type": "array",
+      "metadata": {
+        "description": "Backup Schedule will run on array of Days like, Monday, Tuesday etc. Applies in Weekly Backup Type only."
+      }
+    },
+    "scheduleRunTimes": {
+      "type": "array",
+      "metadata": {
+        "description": "Times in day when backup should be triggered. e.g. 01:00, 13:00. This will be used in LTR too for daily, weekly, monthly and yearly backup."
+      }
+    },
+    "weeklyRetentionDurationCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of weeks you want to retain the backup"
+      }
+    },
+    "daysOfTheWeekForMontlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Days for Monthly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
+      }
+    },
+    "weeksOfTheMonthForMonthlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Weeks for Monthly Retention - First, Second, Third, Fourth, Last"
+      }
+    },
+    "monthlyRetentionDurationCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of months you want to retain the backup"
+      }
+    },
+    "monthsOfYear": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Months for Yearly Retention"
+      }
+    },
+    "daysOfTheWeekForYearlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Days for Yearly Retention (Min One or Max all values from scheduleRunDays, but not any other days which are not part of scheduleRunDays)"
+      }
+    },
+    "weeksOfTheMonthForYearlyRetention": {
+      "type": "array",
+      "metadata": {
+        "description": "Array of Weeks for Yearly Retention - First, Second, Third, Fourth, Last"
+      }
+    },
+    "yearlyRetentionDurationCount": {
+      "type": "int",
+      "metadata": {
+        "description": "Number of years you want to retain the backup"
+      }
+    },
+
+    "skuName": {
+      "type": "string",
+      "defaultValue": "Standard",
+      "allowedValues": [
+        "Standard",
+        "Premium"
+      ],
+      "metadata": {
+        "description": "SKU for the vault"
+      }
+    },
+
     "numberOfwebInstances": {
       "type": "int",
       "defaultValue": 2,
@@ -139,7 +225,13 @@
     "webOSDiskName": "webOSDisk",
     "webVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "webStorageAccountContainerName": "vhds",
-    "webservicedscConfigurationFunction": "dscDCConfiguration.ps1\\web"
+    "webservicedscConfigurationFunction": "dscDCConfiguration.ps1\\web",
+    "backupFabric": "Azure",
+    "protectedItemType": "Microsoft.ClassicCompute/virtualMachines",
+    "resourcegroup": "[resourceGroup().name]",
+    "vmresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('ResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmname'))]",
+    "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
+    "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]"
 
 
   },
@@ -156,414 +248,528 @@
         "accountType": "[variables('vhdStorageType')]"
       }
     },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/publicIPAddresses",
-      "name": "[variables('publicIPAddressName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "PublicIPAddress"
-      },
-      "properties": {
-        "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
-        "dnsSettings": {
-          "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
-        }
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/virtualNetworks",
-      "name": "[variables('virtualNetworkName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "VirtualNetwork"
-      },
-      "properties": {
-        "addressSpace": {
-          "addressPrefixes": [
-            "[variables('addressPrefix')]"
-          ]
+      {
+        "type": "Microsoft.RecoveryServices/vaults",
+        "apiVersion": "2015-11-10",
+        "dependson": [
+
+        ],
+        "name": "[parameters('vaultName')]",
+        "location": "[resourceGroup().location]",
+        "sku": {
+          "name": "RS0",
+          "tier": "Standard"
         },
-        "subnets": [
-          {
-            "name": "[variables('subnetName')]",
-            "properties": {
-              "addressPrefix": "[variables('subnetPrefix')]"
-            }
-          }
-        ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[variables('nicName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "NetworkInterface"
+        "properties": {
+        }
+       
       },
-      "dependsOn": [
-        "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('adnicipaddress')]",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+      {
+        "apiVersion": "2015-11-10",
+        "name": "[concat(parameters('vaultName'), '/', parameters('policyName'))]",
+        "type": "Microsoft.RecoveryServices/vaults/backupPolicies",
+        "dependsOn": [
+          "[concat('Microsoft.RecoveryServices/vaults/', parameters('vaultName'))]"
+
+        ],
+        "location": "[resourceGroup().location]",
+        "properties": {
+          "backupManagementType": "AzureIaasVM",
+          "schedulePolicy": {
+            "scheduleRunFrequency": "Weekly",
+            "scheduleRunDays": "[parameters('scheduleRunDays')]",
+            "scheduleRunTimes": "[parameters('scheduleRunTimes')]",
+            "scheduleRunTimesNew": [ ],
+            "schedulePolicyType": "SimpleSchedulePolicy"
+          },
+          "retentionPolicy": {
+            "dailySchedule": null,
+            "weeklySchedule": {
+              "daysOfTheWeek": "[parameters('scheduleRunDays')]",
+              "retentionTimes": "[parameters('scheduleRunTimes')]",
+              "retentionTimesNew": [ ],
+              "retentionDuration": {
+                "count": "[parameters('weeklyRetentionDurationCount')]",
+                "durationType": "Weeks"
+              }
+            },
+            "monthlySchedule": {
+              "retentionScheduleFormatType": "Weekly",
+              "retentionScheduleDaily": {
+                "daysOfTheMonth": [
+                  {
+                    "date": 1,
+                    "isLast": false
+                  }
+                ]
               },
-              "subnet": {
-                "id": "[variables('subnetRef')]"
+              "retentionScheduleWeekly": {
+                "daysOfTheWeek": "[parameters('daysOfTheWeekForMontlyRetention')]",
+                "weeksOfTheMonth": "[parameters('weeksOfTheMonthForMonthlyRetention')]"
+              },
+              "retentionTimes": "[parameters('scheduleRunTimes')]",
+              "retentionTimesNew": [ ],
+              "retentionDuration": {
+                "count": "[parameters('monthlyRetentionDurationCount')]",
+                "durationType": "Months"
+              }
+            },
+            "yearlySchedule": {
+              "retentionScheduleFormatType": "Weekly",
+              "monthsOfYear": "[parameters('monthsOfYear')]",
+              "retentionScheduleDaily": {
+                "daysOfTheMonth": [
+                  {
+                    "date": 1,
+                    "isLast": false
+                  }
+                ]
+              },
+              "retentionScheduleWeekly": {
+                "daysOfTheWeek": "[parameters('daysOfTheWeekForYearlyRetention')]",
+                "weeksOfTheMonth": "[parameters('weeksOfTheMonthForYearlyRetention')]"
+              },
+              "retentionTimes": "[parameters('scheduleRunTimes')]",
+              "retentionTimesNew": [ ],
+              "retentionDuration": {
+                "count": "[parameters('yearlyRetentionDurationCount')]",
+                "durationType": "Years"
+              }
+            },
+            "retentionPolicyType": "LongTermRetentionPolicy"
+          }
+        }
+      
+      },
+
+      {
+        "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('container'), '/', variables('vmcontainer'))]",
+        "apiVersion": "2015-11-10",
+        "dependsOn": [
+          "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
+
+        ],
+        "location": "[resourceGroup().location]",
+        "type": "Microsoft.RecoveryServices/vaults/backupFabrics/protectionContainers/protectedItems",
+        "properties": {
+          "protectedItemType": "[variables('protectedItemType')]",
+          "policyName": "[parameters('policyName')]",
+          "policyId": "[resourceId('Microsoft.RecoveryServices/vaults/backupPolicies', parameters('VaultName'), parameters('PolicyName'))]",
+          "sourceResourceId": "[variables('vmresourceid')]"
+        }
+      
+    },
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Network/publicIPAddresses",
+        "name": "[variables('publicIPAddressName')]",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "displayName": "PublicIPAddress"
+        },
+        "properties": {
+          "publicIPAllocationMethod": "[variables('publicIPAddressType')]",
+          "dnsSettings": {
+            "domainNameLabel": "[parameters('dnsNameForPublicIP')]"
+          }
+        }
+      },
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Network/virtualNetworks",
+        "name": "[variables('virtualNetworkName')]",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "displayName": "VirtualNetwork"
+        },
+        "properties": {
+          "addressSpace": {
+            "addressPrefixes": [
+              "[variables('addressPrefix')]"
+            ]
+          },
+          "subnets": [
+            {
+              "name": "[variables('subnetName')]",
+              "properties": {
+                "addressPrefix": "[variables('subnetPrefix')]"
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[variables('nicName')]",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "displayName": "NetworkInterface"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
+          "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        ],
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[variables('adnicipaddress')]",
+                "publicIPAddress": {
+                  "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
+                },
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
+                }
+              }
+            }
+          ]
+        }
+      },
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Compute/virtualMachines",
+        "name": "[variables('vmName')]",
+        "location": "[resourceGroup().location]",
+        "tags": {
+          "displayName": "VirtualMachine"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+          "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+        ],
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[variables('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[variables('vmName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('imagePublisher')]",
+              "offer": "[variables('imageOffer')]",
+              "sku": "[parameters('windowsOSVersion')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "osdisk",
+              "vhd": {
+                "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
+              }
+            ]
+          },
+          "diagnosticsProfile": {
+            "bootDiagnostics": {
+              "enabled": true,
+              "storageUri": "[concat('http://', variables('diagnosticsStorageAccountName'), '.blob.core.windows.net')]"
+            }
+          }
+        },
+        "resources": [
+          {
+            "name": "dscDC",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+            ],
+            "tags": {
+              "displayName": "dscDC"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('dscDCConfigurationFunction')]",
+                "properties": {
+                  "nodeName": "[variables('vmName')]",
+                  "domainName": "[parameters('domainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
+              }
+            }
+          }
+
+        ]
+      },
+      {
+        "name": "[variables('bdcNicName')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2015-06-15",
+        "dependsOn": [
+          "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        ],
+        "tags": {
+          "displayName": "bdcNic"
+        },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[variables('bdcnicipaddress')]",
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
+                }
+              }
+            }
+          ],
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.44" ]
+
+          }
+        }
+      },
+      {
+        "name": "[parameters('bdcName')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2015-06-15",
+        "dependsOn": [
+          "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+          "[concat('Microsoft.Network/networkInterfaces/', variables('bdcNicName'))]"
+        ],
+        "tags": {
+          "displayName": "bdc"
+        },
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[variables('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[parameters('bdcName')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('imagePublisher')]",
+              "offer": "[variables('imageOffer')]",
+              "sku": "[parameters('windowsOSVersion')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "bdcOSDisk",
+              "vhd": {
+                "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('bdcNicName'))]"
+              }
+            ]
+          }
+        },
+        "resources": [
+          {
+            "name": "dscbdc",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('bdcname'))]",
+              "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
+            ],
+            "tags": {
+              "displayName": "dscDC"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.9",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
+                "properties": {
+                  "domainName": "[parameters('domainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUserName')]",
+                    "Password": "PrivateSettingsRef:Password"
+                  }
+                }
+              },
+              "protectedSettings": {
+                "items": {
+                  "Password": "[parameters('adminPassword')]"
+                }
               }
             }
           }
         ]
-      }
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Compute/virtualMachines",
-      "name": "[variables('vmName')]",
-      "location": "[resourceGroup().location]",
-      "tags": {
-        "displayName": "VirtualMachine"
       },
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
-      ],
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+      {
+        "name": "[variables('fileserver2NicName')]",
+        "type": "Microsoft.Network/networkInterfaces",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2015-06-15",
+        "dependsOn": [
+          "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        ],
+        "tags": {
+          "displayName": "fileserverNic"
         },
-        "osProfile": {
-          "computerName": "[variables('vmName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
+        "properties": {
+          "ipConfigurations": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('nicName'))]"
-            }
-          ]
-        },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,
-            "storageUri": "[concat('http://', variables('diagnosticsStorageAccountName'), '.blob.core.windows.net')]"
-          }
-        }
-      },
-      "resources": [
-        {
-          "name": "dscDC",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
-          ],
-          "tags": {
-            "displayName": "dscDC"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.9",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationFunction": "[variables('dscDCConfigurationFunction')]",
+              "name": "ipconfig1",
               "properties": {
-                "nodeName": "[variables('vmName')]",
-                "domainName": "[parameters('domainName')]",
-                "domainAdminCredentials": {
-                  "UserName": "[parameters('adminUserName')]",
-                  "Password": "PrivateSettingsRef:Password"
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[variables('fsnicipaddress')]",
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
                 }
               }
+            }
+          ],
+
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.44" ]
+          }
+        }
+
+      },
+
+      {
+        "name": "[parameters('fileserver2Name')]",
+        "type": "Microsoft.Compute/virtualMachines",
+        "location": "[resourceGroup().location]",
+        "apiVersion": "2015-06-15",
+        "dependsOn": [
+          "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+          "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]"
+        ],
+        "tags": {
+          "displayName": "fileserver"
+        },
+        "properties": {
+          "hardwareProfile": {
+            "vmSize": "[variables('vmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[parameters('fileserver2Name')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('imagePublisher')]",
+              "offer": "[variables('imageOffer')]",
+              "sku": "[parameters('windowsOSVersion')]",
+              "version": "latest"
             },
-            "protectedSettings": {
-              "items": {
+            "osDisk": {
+              "name": "fileserverOSDisk",
+              "vhd": {
+                "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver2NicName'))]"
+              }
+            ]
+          }
+        },
+        "resources": [
+          {
+            "apiVersion": "2015-06-15",
+            "type": "extensions",
+            "name": "fileserverdj",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
+              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "JsonADDomainExtension",
+              "typeHandlerVersion": "1.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "Name": "[parameters('DomainName')]",
+                "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                "Restart": "true",
+                "Options": "3"
+              },
+              "protectedsettings": {
                 "Password": "[parameters('adminPassword')]"
               }
             }
           }
-        }
+        ]
 
-      ]
-    },
-    {
-      "name": "[variables('bdcNicName')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "tags": {
-        "displayName": "bdcNic"
       },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('bdcnicipaddress')]",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
+      {
+        "apiVersion": "2015-06-15",
+        "type": "Microsoft.Network/networkInterfaces",
+        "name": "[concat('web-', copyindex(), '-nic')]",
+        "location": "[resourceGroup().location]",
+        "copy": {
+          "name": "web-nic-loop",
+          "count": "[parameters('numberOfwebInstances')]"
+        },
+        "dependsOn": [
+          "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+
         ],
-        "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
-
-        }
-      }
-    },
-    {
-      "name": "[parameters('bdcName')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('bdcNicName'))]"
-      ],
-      "tags": {
-        "displayName": "bdc"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[parameters('bdcName')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "bdcOSDisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
+        "properties": {
+          "ipConfigurations": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('bdcNicName'))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-        {
-          "name": "dscbdc",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('bdcname'))]",
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
-          ],
-          "tags": {
-            "displayName": "dscDC"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.9",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
+              "name": "ipconfig",
               "properties": {
-                "domainName": "[parameters('domainName')]",
-                "domainAdminCredentials": {
-                  "UserName": "[parameters('adminUserName')]",
-                  "Password": "PrivateSettingsRef:Password"
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('subnetRef')]"
                 }
               }
-            },
-            "protectedSettings": {
-              "items": {
-                "Password": "[parameters('adminPassword')]"
-              }
             }
-          }
-        }
-      ]
-    },
-    {
-      "name": "[variables('fileserver2NicName')]",
-      "type": "Microsoft.Network/networkInterfaces",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
-      "tags": {
-        "displayName": "fileserverNic"
-      },
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig1",
-            "properties": {
-              "privateIPAllocationMethod": "Static",
-              "privateIPAddress": "[variables('fsnicipaddress')]",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ],
-
-        "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
-        }
-      }
-    },
-
-    {
-      "name": "[parameters('fileserver2Name')]",
-      "type": "Microsoft.Compute/virtualMachines",
-      "location": "[resourceGroup().location]",
-      "apiVersion": "2015-06-15",
-      "dependsOn": [
-        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]"
-      ],
-      "tags": {
-        "displayName": "fileserver"
-      },
-      "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
-        },
-        "osProfile": {
-          "computerName": "[parameters('fileserver2Name')]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "fileserverOSDisk",
-            "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
-            },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
-            {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver2NicName'))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-        {
-          "apiVersion": "2015-06-15",
-          "type": "extensions",
-          "name": "fileserverdj",
-          "location": "[resourceGroup().location]",
-          "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
           ],
-          "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "JsonADDomainExtension",
-            "typeHandlerVersion": "1.0",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "Name": "[parameters('DomainName')]",
-              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-              "Restart": "true",
-              "Options": "3"
-            },
-            "protectedsettings": {
-              "Password": "[parameters('adminPassword')]"
-            }
+
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.44" ]
           }
         }
-      ]
-    },
-    {
-      "apiVersion": "2015-06-15",
-      "type": "Microsoft.Network/networkInterfaces",
-      "name": "[concat('web-', copyindex(), '-nic')]",
-      "location": "[resourceGroup().location]",
-      "copy": {
-        "name": "web-nic-loop",
-        "count": "[parameters('numberOfwebInstances')]"
-      },
-      "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-
-      ],
-      "properties": {
-        "ipConfigurations": [
-          {
-            "name": "ipconfig",
-            "properties": {
-              "privateIPAllocationMethod": "Dynamic",
-              "subnet": {
-                "id": "[variables('subnetRef')]"
-              }
-            }
-          }
-        ],
-
-        "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
-        }
-      }
+      
     },
 
     {
@@ -682,7 +888,10 @@
 
     }
   ]
-  }
+     
+    }
+  
+
   
 
 

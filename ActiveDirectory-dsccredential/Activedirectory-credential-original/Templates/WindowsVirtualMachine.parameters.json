@@ -12,7 +12,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "emergencylb243"
+      "value": "myfullsys"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -24,10 +24,60 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "emerbdc2"
+          "value": "mybdc"
       },
       "fileserver2Name": {
-          "value": "emerfs3"
+          "value": "myfs"
+      },
+      "vaultName": {
+          "value": "myvault"
+      },
+      "policyName": {
+          "value": "mypolicy"
+      },
+      "scheduleRunDays": {
+          "value": [
+              "Monday"
+          ]
+      },
+      "scheduleRunTimes": {
+          "value": [
+              "2016-09-12T11:00:00.000Z"
+          ]
+      },
+      "weeklyRetentionDurationCount": {
+          "value": 3
+      },
+      "daysOfTheWeekForMontlyRetention": {
+          "value": [
+              "Monday"
+          ]
+      },
+      "weeksOfTheMonthForMonthlyRetention": {
+          "value": [
+              "First"
+          ]
+      },
+      "monthlyRetentionDurationCount": {
+          "value": 3
+      },
+      "monthsOfYear": {
+          "value": [
+              "January"
+          ]
+      },
+      "daysOfTheWeekForYearlyRetention": {
+          "value": [
+              "Monday"
+          ]
+      },
+      "weeksOfTheMonthForYearlyRetention": {
+          "value": [
+              "First"
+          ]
+      },
+      "yearlyRetentionDurationCount": {
+          "value": 3
       }
     
       }
