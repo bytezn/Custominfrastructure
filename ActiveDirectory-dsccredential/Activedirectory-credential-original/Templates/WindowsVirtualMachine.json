@@ -231,7 +231,7 @@
     "resourcegroup": "[resourceGroup().name]",
     "vmresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('ResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmname'))]",
     "fsvmresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('ResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
-    "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]",
+    "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
     "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
     "fscontainer": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]",
     "fsvmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]"
