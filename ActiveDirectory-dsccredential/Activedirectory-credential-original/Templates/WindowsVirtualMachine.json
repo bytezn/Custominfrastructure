@@ -190,15 +190,15 @@
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
-    "adNicIPAddress": "10.0.0.44",
-    "fsnicipaddress": "10.0.0.56",
-    "bdcnicipaddress": "10.0.0.66",
+    "adNicIPAddress": "10.3.0.44",
+    "fsnicipaddress": "10.3.0.56",
+    "bdcnicipaddress": "10.3.0.66",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
-    "addressPrefix": "10.0.0.0/16",
+    "addressPrefix": "10.3.0.0/16",
     "subnetName": "Subnet",
-    "subnetPrefix": "10.0.0.0/24",
+    "subnetPrefix": "10.3.0.0/24",
     "vhdStorageType": "Standard_LRS",
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
@@ -245,16 +245,14 @@
     "vpntype": "RouteBased",
     "localGatewayName": "localGateway",
     "localGatewayIpAddress": "1.1.1.1",
-    "localAddressPrefix": "172.20.244.0/16",
-    "azureVNetAddressPrefix": "10.0.0.0/16",
-    "gatewaySubnetPrefix": "10.1.0.0/29",
+    "localAddressPrefix": "172.20.0.0/16",
+    "azureVNetAddressPrefix": "10.3.0.0/16",
+    "gatewaySubnetPrefix": "10.3.200.0/29",
     "gatewayPublicIPName": "azureGatewayIP",
     "gatewayName": "azureGateway",
     "gatewaySku": "Basic",
     "connectionname": "myconnection",
-    "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]",
-    "api-version": "2015-06-15",
-    "storage-api-version": "2015-05-01-preview"
+    "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]"
 
 
 

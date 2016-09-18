@@ -12,7 +12,7 @@
       "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
-      "value": "mydnslb246"
+      "value": "dnslb5"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -24,10 +24,10 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "mybdc"
+          "value": "mybdc2"
       },
       "fileserver2Name": {
-          "value": "myfs"
+          "value": "myfs2"
       },
       "vaultName": {
           "value": "myvault5"
