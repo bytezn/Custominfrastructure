@@ -25,6 +25,13 @@
       }
     },
 
+    "sharedKey": {
+      "type": "string",
+      "metadata": {
+        "description": "Shared key (PSK) for IPSec tunnel"
+      }
+    },
+
     "vaultName": {
       "type": "string",
       "metadata": {
@@ -234,7 +241,21 @@
     "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
     "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
     "fscontainer": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]",
-    "fsvmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]"
+    "fsvmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]",
+    "vpntype": "RouteBased",
+    "localGatewayName": "localGateway",
+    "localGatewayIpAddress": "1.1.1.1",
+    "localAddressPrefix": "172.20.244.0/16",
+    "azureVNetAddressPrefix": "10.0.0.0/16",
+    "gatewaySubnetPrefix": "10.1.0.0/29",
+    "gatewayPublicIPName": "azureGatewayIP",
+    "gatewayName": "azureGateway",
+    "gatewaySku": "Basic",
+    "connectionname": "myconnection",
+    "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]",
+    "api-version": "2015-06-15",
+    "storage-api-version": "2015-05-01-preview"
+
 
 
   },
@@ -907,10 +928,81 @@
         }
       ]
 
+    },
+    {
+      "name": "sitesite",
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2015-01-01",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+      ],
+      "properties": {
+        "mode": "Incremental",
+        "templateLink": {
+          "uri": "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fileservermultidjmultibackupsitetosite/sitetosite.json",
+          "contentVersion": "1.0.0.0"
+        },
+        "parameters": {
+          "vpntype": {
+            "value": "[variables('vpntype')]"
+          },
+          "localGatewayName": {
+            "value": "[variables('localGatewayName')]"
+          },
+          "localGatewayIpAddress": {
+            "value": "[variables('localGatewayIpAddress')]"
+          },
+          "localAddressPrefix": {
+            "value": "[variables('localAddressPrefix')]"
+          },
+          "virtualNetworkName": {
+            "value": "[variables('virtualNetworkName')]"
+          },
+          "azureVNetAddressPrefix": {
+            "value": "[variables('azureVNetAddressPrefix')]"
+          },
+          "subnetName": {
+            "value": "[variables('subnetName')]"
+          },
+          "subnetPrefix": {
+            "value": "[variables('subnetPrefix')]"
+          },
+          "gatewaySubnetPrefix": {
+            "value": "[variables('gatewaySubnetPrefix')]"
+          },
+          "gatewayPublicIPName": {
+            "value": "[variables('gatewayPublicIPName')]"
+          },
+          "gatewayName": {
+            "value": "[variables('gatewayName')]"
+          },
+          "connectionName": {
+            "value": "[variables('connectionName')]"
+          },
+          "sharedKey": {
+            "value": "[parameters('sharedKey')]"
+          },
+
+          "vnetid": {
+            "value": "[variables('vnetid')]"
+          },
+          "subnetref": {
+            "value": "[variables('subnetref')]"
+          },
+
+          "apiversion": {
+            "value": "[variables('api-version')]"
+          },
+          "storage-api-version": {
+            "value": "[variables('storage-api-version')]"
+          }
+        }
+        
+
+      }
     }
   ]
-     
-    }
+}
   
 
   
