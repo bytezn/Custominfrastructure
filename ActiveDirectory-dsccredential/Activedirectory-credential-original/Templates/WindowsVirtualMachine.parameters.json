@@ -12,7 +12,7 @@
       "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
-      "value": "myfullsystqw"
+      "value": "mydnslb246"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -30,10 +30,10 @@
           "value": "myfs"
       },
       "vaultName": {
-          "value": "myvault2"
+          "value": "myvault5"
       },
       "policyName": {
-          "value": "mypolicy2"
+          "value": "mypolicy5"
       },
       "scheduleRunDays": {
           "value": [
@@ -78,6 +78,9 @@
       },
       "yearlyRetentionDurationCount": {
           "value": 3
+      },
+      "sharedKey": {
+          "value": "lawrance"
       }
     
       }

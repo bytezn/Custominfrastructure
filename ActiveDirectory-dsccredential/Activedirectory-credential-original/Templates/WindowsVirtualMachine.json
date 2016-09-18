@@ -969,33 +969,21 @@
           },
           "gatewaySubnetPrefix": {
             "value": "[variables('gatewaySubnetPrefix')]"
-          },
+           },
           "gatewayPublicIPName": {
             "value": "[variables('gatewayPublicIPName')]"
-          },
+           },
           "gatewayName": {
             "value": "[variables('gatewayName')]"
-          },
+           },
           "connectionName": {
             "value": "[variables('connectionName')]"
-          },
+            },
           "sharedKey": {
             "value": "[parameters('sharedKey')]"
-          },
-
-          "vnetid": {
-            "value": "[variables('vnetid')]"
-          },
-          "subnetref": {
-            "value": "[variables('subnetref')]"
-          },
-
-          "apiversion": {
-            "value": "[variables('api-version')]"
-          },
-          "storage-api-version": {
-            "value": "[variables('storage-api-version')]"
-          }
+            }
+            
+        
         }
         
 
