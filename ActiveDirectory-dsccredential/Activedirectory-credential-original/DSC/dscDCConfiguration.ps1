@@ -9,7 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
  
 Node localhost
     {
@@ -102,7 +102,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
  
 Node localhost
     {
@@ -119,14 +119,7 @@ Node localhost
             Name = "RSAT-AD-PowerShell"
             Ensure = "Present"
         } 
-
-        xComputer DomainJoin
-        {
-            Name = $NodeName
-            DomainName = $domainName
-            Credential = $domainAdminCredentials
-            DependsOn = "[WindowsFeature]ADPowershell" 
-        }
+      
      }
 
 }

@@ -584,7 +584,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
+          "dnsServers": [ "10.3.0.44" ]
 
         }
       }
@@ -642,10 +642,11 @@
           "apiVersion": "2015-06-15",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('bdcname'))]",
-            "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]",
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
           ],
           "tags": {
-            "displayName": "dscDC"
+            "displayName": "dscbdc"
           },
           "properties": {
             "publisher": "Microsoft.Powershell",
@@ -699,7 +700,7 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
+          "dnsServers": [ "10.3.0.44" ]
         }
       }
 
@@ -806,7 +807,7 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.44" ]
+          "dnsServers": [ "10.3.0.44" ]
         }
       }
 
@@ -933,7 +934,7 @@
       "apiVersion": "2015-01-01",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-      ],
+         ],
       "properties": {
         "mode": "Incremental",
         "templateLink": {
