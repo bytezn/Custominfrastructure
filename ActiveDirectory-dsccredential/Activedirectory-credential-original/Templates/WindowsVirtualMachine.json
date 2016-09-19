@@ -308,7 +308,7 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
      
       ],
       "tags": {
@@ -328,7 +328,7 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.4" ]
+          "dnsServers": [ ]
           
         }  
             
@@ -387,7 +387,8 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'),'/extensions/','Microsoft.EnterpriseCloud.Monitoring')]"
           ],
           "tags": {
             "displayName": "fileserverdsc"
@@ -413,9 +414,10 @@
               "type": "extensions",
               "location": "[resourceGroup().location]",
               "apiVersion": "2015-06-15",
-              "dependsOn": [
-                  "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
-              ],
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
+          
+            ],
               "tags": {
                   "displayName": "omsdc"
               },
