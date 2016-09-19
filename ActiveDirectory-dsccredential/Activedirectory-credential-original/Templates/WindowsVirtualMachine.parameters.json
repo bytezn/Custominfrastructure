@@ -25,6 +25,12 @@
       },
       "virtualNetworkName": {
           "value": "myvnet"
+      },
+      "workspaceId": {
+          "value": "757c2b56-d042-4da8-a8bf-6e713551dcc0"
+      },
+      "workspaceKey": {
+          "value": "uqJ84hFHys/oA0z6jfdvYkIo8CQG2e+If1s/inJUPtse84vfCXxzfSofUfRmHg6dYsupChEj3f/tM/eV6Yh5aQ=="
       }
     
       }

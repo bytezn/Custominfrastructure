@@ -81,7 +81,19 @@
     "fileserverName": {
       "type": "string",
       "minLength": 1
-    }
+    },
+      "workspaceId": {
+          "type": "string",
+          "metadata": {
+              "description": "The Workspace ID is the Operations Management Suite Workspace ID found in the OMS Console under Settings and Connected Sources"
+          }
+      },
+      "workspaceKey": {
+          "type": "string",
+          "metadata": {
+              "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
+          }
+      }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
@@ -395,7 +407,31 @@
             },
             "protectedSettings": { }
           }
-        }
+        },
+          {
+              "name": "Microsoft.EnterpriseCloud.Monitoring",
+              "type": "extensions",
+              "location": "[resourceGroup().location]",
+              "apiVersion": "2015-06-15",
+              "dependsOn": [
+                  "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
+              ],
+              "tags": {
+                  "displayName": "omsdc"
+              },
+              "properties": {
+                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                  "type": "MicrosoftMonitoringAgent",
+                  "typeHandlerVersion": "1.0",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                      "workspaceId": "[parameters('workspaceId')]"
+                  },
+                  "protectedSettings": {
+                      "workspaceKey": "[parameters('workspaceKey')]"
+                  }
+              }
+          }
       ]
     }
   ]
