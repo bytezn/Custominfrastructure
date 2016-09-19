@@ -190,15 +190,15 @@
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
-    "adNicIPAddress": "10.3.0.44",
-    "fsnicipaddress": "10.3.0.56",
-    "bdcnicipaddress": "10.3.0.66",
+    "adNicIPAddress": "10.2.0.44",
+    "fsnicipaddress": "10.2.0.56",
+    "bdcnicipaddress": "10.2.0.66",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
-    "addressPrefix": "10.3.0.0/16",
+    "addressPrefix": "10.2.0.0/16",
     "subnetName": "Subnet",
-    "subnetPrefix": "10.3.0.0/24",
+    "subnetPrefix": "10.2.0.0/24",
     "vhdStorageType": "Standard_LRS",
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
@@ -246,8 +246,8 @@
     "localGatewayName": "localGateway",
     "localGatewayIpAddress": "1.1.1.1",
     "localAddressPrefix": "172.20.0.0/16",
-    "azureVNetAddressPrefix": "10.3.0.0/16",
-    "gatewaySubnetPrefix": "10.3.200.0/29",
+    "azureVNetAddressPrefix": "10.2.0.0/16",
+    "gatewaySubnetPrefix": "10.2.200.0/29",
     "gatewayPublicIPName": "azureGatewayIP",
     "gatewayName": "azureGateway",
     "gatewaySku": "Basic",
@@ -584,7 +584,7 @@
           }
         ],
         "dnsSettings": {
-          "dnsServers": [ "10.3.0.44" ]
+          "dnsServers": [ "10.2.0.44" ]
 
         }
       }
@@ -700,7 +700,7 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.3.0.44" ]
+          "dnsServers": [ "10.2.0.44" ]
         }
       }
 
@@ -807,7 +807,7 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.3.0.44" ]
+          "dnsServers": [ "10.2.0.44" ]
         }
       }
 

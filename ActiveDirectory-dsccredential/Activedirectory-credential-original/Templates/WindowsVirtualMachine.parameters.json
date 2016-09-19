@@ -12,7 +12,7 @@
       "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
-      "value": "sitegodep01"
+      "value": "sitegodep03"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -30,10 +30,10 @@
           "value": "sitedepfs"
       },
       "vaultName": {
-          "value": "sitegodepvaul01"
+          "value": "sitegodepvaul02"
       },
       "policyName": {
-          "value": "sitegodeppol01"
+          "value": "sitegodeppol02"
       },
       "scheduleRunDays": {
           "value": [
