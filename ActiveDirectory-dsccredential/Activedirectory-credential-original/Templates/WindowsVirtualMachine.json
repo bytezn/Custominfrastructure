@@ -160,18 +160,6 @@
       }
     },
 
-    "_artifactsLocation": {
-      "type": "string",
-      "metadata": {
-        "description": "Auto-generated container in staging storage account to receive post-build staging folder upload"
-      }
-    },
-    "_artifactsLocationSasToken": {
-      "type": "securestring",
-      "metadata": {
-        "description": "Auto-generated token to access _artifactsLocation"
-      }
-    },
     "bdcName": {
       "type": "string",
       "minLength": 1
@@ -231,7 +219,8 @@
     "resourcegroup": "[resourceGroup().name]",
     "vmresourceid": "[concat('/subscriptions/', subscription().subscriptionId, '/resourceGroups/', variables('ResourceGroup'), '/providers/', 'Microsoft.Compute/virtualMachines/', variables('vmname'))]",
     "container": "[concat('iaasvmcontainer;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
-    "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]"
+    "vmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',variables('vmname'))]",
+    "assetlocation":"https://raw.githubusercontent.com/bytezn/softwaredefined/master/fswebdjwebvaultpolicybackup"
 
 
   },
@@ -497,9 +486,8 @@
               "typeHandlerVersion": "2.9",
               "autoUpgradeMinorVersion": true,
               "settings": {
-                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                "configurationFunction": "[variables('dscDCConfigurationFunction')]",
+                "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+               "configurationFunction": "[variables('dscDCConfigurationFunction')]",
                 "properties": {
                   "nodeName": "[variables('vmName')]",
                   "domainName": "[parameters('domainName')]",
@@ -613,8 +601,7 @@
               "typeHandlerVersion": "2.9",
               "autoUpgradeMinorVersion": true,
               "settings": {
-                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
                 "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
                 "properties": {
                   "domainName": "[parameters('domainName')]",
@@ -866,8 +853,7 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
               "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
               "properties": {
                 "domainName": "[parameters('domainName')]",
