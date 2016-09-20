@@ -9,19 +9,19 @@
       "value": "Master123"
     },
     "domainName": {
-      "value": "contoso.com"
+      "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
-      "value": "blog3212343"
+      "value": "vmbackvaultlb"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
       "vaultName": {
-          "value": "myvva"
+          "value": "vmbackupvault"
       },
       "policyName": {
-          "value": "mypolic"
+          "value": "vmbackuppolicy"
       },
       "scheduleRunDays": {
           "value": [
