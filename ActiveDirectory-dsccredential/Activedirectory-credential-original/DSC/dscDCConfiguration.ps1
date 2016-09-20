@@ -9,7 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
  
 Node localhost
     {
@@ -102,7 +102,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
  
 Node localhost
     {
