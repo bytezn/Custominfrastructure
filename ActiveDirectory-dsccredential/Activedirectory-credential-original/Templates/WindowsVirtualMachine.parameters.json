@@ -9,16 +9,16 @@
       "value": "Master123"
     },
      "dnsNameForPublicIP": {
-      "value": "noah03lb"
+      "value": "markdclb2"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
     },
       "vaultName": {
-          "value": "noah03vault"
+          "value": "markvault"
       },
       "policyName": {
-          "value": "noah03pol"
+          "value": "markpolicy"
       },
       "scheduleRunDays": {
           "value": [
