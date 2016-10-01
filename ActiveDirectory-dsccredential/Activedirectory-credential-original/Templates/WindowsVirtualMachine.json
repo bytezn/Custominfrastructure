@@ -413,34 +413,43 @@
             }
           }
         },
-          {
-              "name": "dfsdsc",
-              "type": "extensions",
-              "location": "[resourceGroup().location]",
-              "apiVersion": "2015-06-15",
-            "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]",
-              "Microsoft.Compute/virtualMachines/fileserver/extensions/fileserverdj"
-            ],
-              "tags": {
-                  "displayName": "dfsdsc"
-              },
-              "properties": {
-                  "publisher": "Microsoft.Powershell",
-                  "type": "DSC",
-                  "typeHandlerVersion": "2.9",
-                  "autoUpgradeMinorVersion": true,
-                "settings": {
-                  "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                  "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                  "configurationFunction": "[variables('dfsdscConfigurationFunction')]",
-                  "properties": {
-                    "nodeName": "[parameters('fileserverName')]"
-                  }
-                },
-                  "protectedSettings": { }
+        {
+          "name": "dfsdsc",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]",
+            "Microsoft.Compute/virtualMachines/fileserver/extensions/fileserverdj"
+          ],
+          "tags": {
+            "displayName": "dfsdsc"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.11",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('dfsdscConfigurationFunction')]",
+              "Properties": {
+                "domainName": "[parameters('DomainName')]",
+                "domainAdminCredentials": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:adminPassword"
+                }
+
               }
+            },
+            "protectedSettings": {
+              "Items": {
+                "adminPassword": "[parameters('adminPassword')]"
+              }
+            }
           }
+        }
       ]
     },
       {
@@ -545,35 +554,44 @@
               }
             }
           },
-            {
-                "name": "dscdfs2",
-                "type": "extensions",
-                "location": "[resourceGroup().location]",
-                "apiVersion": "2015-06-15",
-              "dependsOn": [
-                "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2Name'))]",
-                "Microsoft.Compute/virtualMachines/fileserver/extensions/dfsdsc",
-                "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
-              ],
-                "tags": {
-                    "displayName": "dscdfs2"
-                },
-                "properties": {
-                    "publisher": "Microsoft.Powershell",
-                    "type": "DSC",
-                    "typeHandlerVersion": "2.9",
-                    "autoUpgradeMinorVersion": true,
-                  "settings": {
-                    "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                    "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                    "configurationFunction": "[variables('dscdfs2ConfigurationFunction')]",
-                    "properties": {
-                      "nodeName": "[parameters('fileserver2Name')]"
-                    }
-                  },
-                    "protectedSettings": { }
+          {
+            "name": "dscdfs2",
+            "type": "extensions",
+            "location": "[resourceGroup().location]",
+            "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2Name'))]",
+              "Microsoft.Compute/virtualMachines/fileserver/extensions/dfsdsc",
+              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+            ],
+            "tags": {
+              "displayName": "dscdfs2"
+            },
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.11",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('dscdfs2ConfigurationFunction')]",
+                "Properties": {
+                  "domainName": "[parameters('DomainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUsername')]",
+                    "Password": "PrivateSettingsRef:adminPassword"
+                  }
+
                 }
+              },
+              "protectedSettings": {
+                "Items": {
+                  "adminPassword": "[parameters('adminPassword')]"
+                }
+              }
             }
+          }
         ]
       }
   ]

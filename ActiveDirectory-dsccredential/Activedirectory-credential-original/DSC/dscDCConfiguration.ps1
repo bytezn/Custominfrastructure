@@ -73,6 +73,7 @@ Node localhost
             ContentPaths = 'c:\software'
             PSDSCRunAsCredential = $domainAdminCredentials
             DependsOn = '[WindowsFeature]RSATDFSMgmtConInstall'
+			DomainName = 'contoso.com'
          } 	 
 
       }
