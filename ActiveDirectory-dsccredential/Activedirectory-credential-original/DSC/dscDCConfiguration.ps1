@@ -5,6 +5,9 @@ configuration bdc
         [Parameter(Mandatory)]
         [String]$DomainName,
 
+		[Parameter(Mandatory)]
+        [String]$vmname,
+
         [Parameter(Mandatory)]
         [System.Management.Automation.PSCredential]$domainAdmincredentials,
 
@@ -12,7 +15,7 @@ configuration bdc
         [Int]$RetryIntervalSec=30
     ) 
     
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xdfs
     
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
    
@@ -50,6 +53,28 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XC
             SysvolPath = "c:\SYSVOL"
         }
 	   
+		 WindowsFeature RSATDFSMgmtConInstall
+        {
+            Ensure = "Present"
+            Name = "RSAT-DFS-Mgmt-Con"
+		    DependsOn = '[xADDomainController]BDC'
+        }
+
+        xDFSReplicationGroup RGPublic
+
+        {
+            GroupName = 'Public'
+            Description = 'Public files for use by all departments'
+            Ensure = 'Present'
+           # Members = 'FileServer1','FileServer2.contoso.com'
+            Members = $NodeName, 'dc.contoso.com'
+			Folders = 'Software', 'Software'
+			Topology = 'Fullmesh'
+            ContentPaths = 'c:\software', 'c:\software'
+            PSDSCRunAsCredential = $domainAdminCredentials
+            DependsOn = '[WindowsFeature]RSATDFSMgmtConInstall'
+        } 
+
     }
   
  }  

@@ -60,8 +60,8 @@ if ($UploadArtifacts) {
     }
 
     $StorageAcc = Get-AzureRmStorageAccountKey -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName
-	$StorageAccountKey = "vLDHgq0JG8wVs8ahScf9JCJgo4zpPa1dfmnwBToV7BJYwY/5LZZULzYe77XPt1MnLlWV9R0wlliPOn0JamekKA=="
-    $StorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName).Context
+	$StorageAccountKey = "ZHVXoIWBJbGDdM8FvKDWnG0ewSX7VKCEkiffM5Ia1/LkPHH5n5lAv7ER3fhxCAw0dCSkeovmSRjF7Yn/pb/GcA=="
+	$StorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName).Context
 
     # Copy Configuration Data files into staging directory
 Get-ChildItem $DSCSourceFolder -File -Filter '*.psd1' | Copy-Item -Destination $ArtifactStagingDirectory -Force

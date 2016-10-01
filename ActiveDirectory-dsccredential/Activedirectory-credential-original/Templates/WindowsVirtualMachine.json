@@ -401,6 +401,7 @@
                 "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
                 "properties": {
                   "domainName": "[parameters('domainName')]",
+                  "vmname": "[variables('vmname')]",
                   "domainAdminCredentials": {
                     "UserName": "[parameters('adminUserName')]",
                     "Password": "PrivateSettingsRef:Password"
