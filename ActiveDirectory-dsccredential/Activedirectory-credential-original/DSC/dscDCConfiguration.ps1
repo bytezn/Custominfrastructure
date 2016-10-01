@@ -9,7 +9,40 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xdfs
+ 
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+      
+		WindowsFeature RSATDFSMgmtConInstall
+        {
+            Ensure = "Present"
+            Name = "RSAT-DFS-Mgmt-Con"
+		}
+		       		 
+     }
+
+}
+
+Configuration fileserver2
+{
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $domainName,
+    [System.Management.Automation.PSCredential]$domainAdminCredentials
+)
+ 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xdfs
  
 Node localhost
     {
@@ -21,23 +54,30 @@ Node localhost
             AllowModuleOverwrite = $true
         }
  
-         WindowsFeature ADPowershell
+		WindowsFeature RSATDFSMgmtConInstall
         {
-            Name = "RSAT-AD-PowerShell"
             Ensure = "Present"
-        } 
+            Name = "RSAT-DFS-Mgmt-Con"
+		  }
 
-        xComputer DomainJoin
+        xDFSReplicationGroup RGPublic
+
         {
-            Name = $NodeName
-            DomainName = $domainName
-            Credential = $domainAdminCredentials
-            DependsOn = "[WindowsFeature]ADPowershell" 
-        }
-     }
+            GroupName = 'Public'
+            Description = 'Public files for use by all departments'
+            Ensure = 'Present'
+            Members = 'FileServer.contoso.com','FileServer2.contoso.com'
+           # Members = $NodeName, 'dc.contoso.com'
+			Folders = 'Software'
+			Topology = 'Fullmesh'
+            ContentPaths = 'c:\software'
+            PSDSCRunAsCredential = $domainAdminCredentials
+            DependsOn = '[WindowsFeature]RSATDFSMgmtConInstall'
+         } 	 
+
+      }
 
 }
-
 
 Configuration Main
 {

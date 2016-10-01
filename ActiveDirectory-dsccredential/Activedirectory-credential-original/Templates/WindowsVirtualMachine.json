@@ -81,12 +81,17 @@
     "fileserverName": {
       "type": "string",
       "minLength": 1
-    }
+    },
+      "fileserver2Name": {
+          "type": "string",
+          "minLength": 1
+      }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
     "adNicIPAddress": "10.0.0.4",
     "fsNicIPAddress": "10.0.0.5",
+    "fs2NicIPAddress": "10.0.0.6",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
@@ -117,7 +122,18 @@
     "fileserverVnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "fileserverStorageAccountContainerName": "vhds",
     "fileserverNicName": "[concat(parameters('fileserverName'), 'NetworkInterface')]",
-    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver"
+    "fileserverdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver",
+    "fileserver2ImagePublisher": "MicrosoftWindowsServer",
+    "fileserver2ImageOffer": "WindowsServer",
+    "fileserver2OSDiskName": "fileserver2OSDisk",
+    "fileserver2VmSize": "Standard_D1",
+    "fileserver2VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "fileserver2SubnetRef": "[concat(variables('fileserver2VnetID'), '/subnets/', variables('subnetName'))]",
+    "fileserver2StorageAccountContainerName": "vhds",
+    "fileserver2NicName": "[concat(parameters('fileserver2Name'), 'NetworkInterface')]",
+    "fsdscConfigurationFunction": "fsdscConfiguration.ps1\\Main",
+    "dfsdscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver",
+    "dscdfs2ConfigurationFunction": "dscDCConfiguration.ps1\\fileserver2"
   },
   "resources": [
     {
@@ -396,9 +412,170 @@
               "Password": "[parameters('adminPassword')]"
             }
           }
-        }
+        },
+          {
+              "name": "dfsdsc",
+              "type": "extensions",
+              "location": "[resourceGroup().location]",
+              "apiVersion": "2015-06-15",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]",
+              "Microsoft.Compute/virtualMachines/fileserver/extensions/fileserverdj"
+            ],
+              "tags": {
+                  "displayName": "dfsdsc"
+              },
+              "properties": {
+                  "publisher": "Microsoft.Powershell",
+                  "type": "DSC",
+                  "typeHandlerVersion": "2.9",
+                  "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                  "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                  "configurationFunction": "[variables('dfsdscConfigurationFunction')]",
+                  "properties": {
+                    "nodeName": "[parameters('fileserverName')]"
+                  }
+                },
+                  "protectedSettings": { }
+              }
+          }
       ]
-    }
+    },
+      {
+          "name": "[variables('fileserver2NicName')]",
+          "type": "Microsoft.Network/networkInterfaces",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+          ],
+          "tags": {
+              "displayName": "fileserver2Nic"
+          },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Static",
+                "privateIPAddress": "[variables('fs2NicIPAddress')]",
+                "subnet": {
+                  "id": "[variables('fileserver2SubnetRef')]"
+                }
+              }
+            }
+          ],
+
+          "dnsSettings": {
+            "dnsServers": [ "10.0.0.4" ]
+
+          }
+        }
+      },
+      {
+          "name": "[parameters('fileserver2Name')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+              "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]"
+          ],
+          "tags": {
+              "displayName": "fileserver2"
+          },
+          "properties": {
+              "hardwareProfile": {
+                  "vmSize": "[variables('fileserver2VmSize')]"
+              },
+            "osProfile": {
+              "computerName": "[parameters('fileserver2Name')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
+              "storageProfile": {
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
+                  "osDisk": {
+                      "name": "fileserver2OSDisk",
+                      "vhd": {
+                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver2NicName'))]"
+                      }
+                  ]
+              }
+          },
+        "resources": [
+          {
+            "apiVersion": "2015-06-15",
+            "type": "extensions",
+            "name": "fileserverdj",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
+              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "JsonADDomainExtension",
+              "typeHandlerVersion": "1.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "Name": "[parameters('DomainName')]",
+                "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                "Restart": "true",
+                "Options": "3"
+              },
+              "protectedsettings": {
+                "Password": "[parameters('adminPassword')]"
+              }
+            }
+          },
+            {
+                "name": "dscdfs2",
+                "type": "extensions",
+                "location": "[resourceGroup().location]",
+                "apiVersion": "2015-06-15",
+              "dependsOn": [
+                "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2Name'))]",
+                "Microsoft.Compute/virtualMachines/fileserver/extensions/dfsdsc",
+                "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+              ],
+                "tags": {
+                    "displayName": "dscdfs2"
+                },
+                "properties": {
+                    "publisher": "Microsoft.Powershell",
+                    "type": "DSC",
+                    "typeHandlerVersion": "2.9",
+                    "autoUpgradeMinorVersion": true,
+                  "settings": {
+                    "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                    "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                    "configurationFunction": "[variables('dscdfs2ConfigurationFunction')]",
+                    "properties": {
+                      "nodeName": "[parameters('fileserver2Name')]"
+                    }
+                  },
+                    "protectedSettings": { }
+                }
+            }
+        ]
+      }
   ]
 }
       
