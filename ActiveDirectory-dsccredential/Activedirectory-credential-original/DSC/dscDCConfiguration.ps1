@@ -42,7 +42,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, xDFS
  
 Node localhost
     {
@@ -111,5 +111,31 @@ Node localhost
             SysvolPath = "C:\Windows\Sysvol"
             DependsOn = '[WindowsFeature]ADDS_Install'
         }
-    }
-}
+
+        WindowsFeature RSATDFSMgmtConInstall
+        {
+            Ensure = "Present"
+            Name = "RSAT-DFS-Mgmt-Con"
+		    DependsOn = '[xADDomain]CreateForest'
+        }
+
+        xDFSReplicationGroup RGPublic
+
+        {
+            GroupName = 'Public'
+            Description = 'Public files for use by all departments'
+            Ensure = 'Present'
+           # Members = 'FileServer1','FileServer2.contoso.com'
+            Members = $NodeName
+			Folders = 'Software'
+			Topology = 'Fullmesh'
+            ContentPaths = 'c:\software'
+            PSDSCRunAsCredential = $domainAdminCredentials
+            DependsOn = '[WindowsFeature]RSATDFSMgmtConInstall'
+        } 
+
+      }
+   }
+
+
+
