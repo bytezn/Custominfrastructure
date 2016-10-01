@@ -8,11 +8,9 @@
     "adminPassword": {
       "value": "Master123"
     },
-    "domainName": {
-      "value": "contoso.com"
-    },
+ 
     "dnsNameForPublicIP": {
-      "value": "mymy24457"
+      "value": "deploy66rg"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
