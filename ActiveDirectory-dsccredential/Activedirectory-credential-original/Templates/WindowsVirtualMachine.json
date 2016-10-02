@@ -190,6 +190,30 @@
       "fileserver3Name": {
           "type": "string",
           "minLength": 1
+      },
+      "workspaceId": {
+          "type": "string",
+          "metadata": {
+              "description": "The Workspace ID is the Operations Management Suite Workspace ID found in the OMS Console under Settings and Connected Sources"
+          }
+      },
+      "workspaceKey": {
+          "type": "string",
+          "metadata": {
+              "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
+          }
+      },
+      "workspaceId2": {
+          "type": "string",
+          "metadata": {
+              "description": "The Workspace ID is the Operations Management Suite Workspace ID found in the OMS Console under Settings and Connected Sources"
+          }
+      },
+      "workspaceKey2": {
+          "type": "string",
+          "metadata": {
+              "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
+          }
       }
   },
   "variables": {
@@ -204,14 +228,14 @@
     "subnetName": "Subnet",
     "subnetPrefix": "10.2.0.0/24",
     "vhdStorageType": "Standard_LRS",
-    "publicIPAddressName": "myPublicIP",
-    "publicIpRef": "publicIp",
+    "publicIPAddressName": "Ipforjumpbox",
+    "publicIpRef": "loadbalancerip",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
     "AvailabilitysetName": "webserverset",
     "vmName": "dc",
     "vmSize": "Standard_A2",
-    "virtualNetworkName": "MyVNET",
+    "virtualNetworkName": "LawranceNET",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "subnetRef": "[concat(variables('vnetId'), '/subnets/', variables('subnetName'))]",
     "vhdStorageName": "[concat('vhdstorage', uniqueString(resourceGroup().id))]",
@@ -263,7 +287,7 @@
     "gatewayName": "azureGateway",
     "dnsNameForLB": "dnsforlb",
     "gatewaySku": "Basic",
-    "connectionname": "myconnection",
+    "connectionname": "sitetosite",
     "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]",
       "fileserver3OSDiskName": "fileserver3OSDisk",
       "fileserver3VmSize": "Standard_D1",
@@ -934,7 +958,31 @@
               }
             }
           }
-        }
+        },
+          {
+              "name": "Microsoft.EnterpriseCloud.Monitoring",
+              "type": "extensions",
+              "location": "[resourceGroup().location]",
+              "apiVersion": "2015-06-15",
+              "dependsOn": [
+                  "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2Name'))]"
+              ],
+              "tags": {
+                  "displayName": "fileserveroms"
+              },
+              "properties": {
+                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                  "type": "MicrosoftMonitoringAgent",
+                  "typeHandlerVersion": "1.0",
+                  "autoUpgradeMinorVersion": true,
+                  "settings": {
+                      "workspaceId": "[parameters('workspaceId')]"
+                  },
+                  "protectedSettings": {
+                      "workspaceKey": "[parameters('workspaceKey')]"
+                  }
+              }
+          }
       ]
 
     },
@@ -1278,7 +1326,7 @@
             "dependsOn": [
               "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
               "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'),'/extensions/fileserverdj3')]",
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserver3dsc')]"
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserver2dsc')]"
             ],
             "properties": {
               "publisher": "Microsoft.Powershell",
@@ -1304,7 +1352,31 @@
                 }
               }
             }
-          }
+          },
+            {
+                "name": "Microsoft.EnterpriseCloud.Monitoring",
+                "type": "extensions",
+                "location": "[resourceGroup().location]",
+                "apiVersion": "2015-06-15",
+                "dependsOn": [
+                    "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3Name'))]"
+                ],
+                "tags": {
+                    "displayName": "fileserver3oms"
+                },
+                "properties": {
+                    "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+                    "type": "MicrosoftMonitoringAgent",
+                    "typeHandlerVersion": "1.0",
+                    "autoUpgradeMinorVersion": true,
+                    "settings": {
+                        "workspaceId": "[parameters('workspaceId2')]"
+                    },
+                    "protectedSettings": {
+                        "workspaceKey": "[parameters('workspaceKey2')]"
+                    }
+                }
+            }
         ]
       }
   ]}
