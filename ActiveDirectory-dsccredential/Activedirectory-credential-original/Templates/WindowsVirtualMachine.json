@@ -130,7 +130,7 @@
     "fileserver2SubnetRef": "[concat(variables('fileserver2VnetID'), '/subnets/', variables('subnetName'))]",
     "fileserver2StorageAccountContainerName": "vhds",
     "fileserver2NicName": "[concat(parameters('fileserver2Name'), 'NetworkInterface')]",
-    "fileserver2dscConfigurationFunction": "dscDCConfiguration.ps1.ps1\\fileserver2"
+    "fileserver2dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver2"
 
   },
   "resources": [
