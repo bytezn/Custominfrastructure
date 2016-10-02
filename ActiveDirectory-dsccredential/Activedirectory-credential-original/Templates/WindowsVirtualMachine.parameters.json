@@ -9,10 +9,10 @@
       "value": "Master123"
     },
     "domainName": {
-      "value": "lawrance.com"
+      "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "dnslb05"
+      "value": "mydnslb01"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -27,13 +27,13 @@
           "value": "bdc01"
       },
       "fileserver2Name": {
-          "value": "fileserver"
+          "value": "fileserver2"
       },
       "vaultName": {
-          "value": "sitedp1"
+          "value": "myvault"
       },
       "policyName": {
-          "value": "sitepol07"
+          "value": "mypolicy"
       },
       "scheduleRunDays": {
           "value": [
@@ -80,7 +80,16 @@
           "value": 3
       },
       "sharedKey": {
-          "value": "lawrance"
+          "value": "sharedkey"
+      },
+      "fileserver3Name": {
+          "value": "fileserver3"
+      },
+      "workspaceId": {
+          "value": "757c2b56-d042-4da8-a8bf-6e713551dcc0"
+      },
+      "workspaceKey": {
+          "value": "uqJ84hFHys/oA0z6jfdvYkIo8CQG2e+If1s/inJUPtse84vfCXxzfSofUfRmHg6dYsupChEj3f/tM/eV6Yh5aQ=="
       }
     
       }

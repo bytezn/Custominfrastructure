@@ -202,18 +202,6 @@
           "metadata": {
               "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
           }
-      },
-      "workspaceId2": {
-          "type": "string",
-          "metadata": {
-              "description": "The Workspace ID is the Operations Management Suite Workspace ID found in the OMS Console under Settings and Connected Sources"
-          }
-      },
-      "workspaceKey2": {
-          "type": "string",
-          "metadata": {
-              "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
-          }
       }
   },
   "variables": {
@@ -223,7 +211,7 @@
     "bdcnicipaddress": "10.2.0.66",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
-    "nicName": "myVMNic",
+    "nicName": "dcnic",
     "addressPrefix": "10.2.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.2.0.0/24",
@@ -289,14 +277,14 @@
     "gatewaySku": "Basic",
     "connectionname": "sitetosite",
     "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]",
-      "fileserver3OSDiskName": "fileserver3OSDisk",
-      "fileserver3VmSize": "Standard_D1",
-      "fileserver3VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
-      "fileserver3SubnetRef": "[concat(variables('fileserver3VnetID'), '/subnets/', variables('subnetName'))]",
-      "fileserver3StorageAccountContainerName": "vhds",
-      "fileserver3NicName": "[concat(parameters('fileserver3Name'), 'NetworkInterface')]",
-      "fileserver2dscConfigurationFunction": "fileserverdscConfiguration.ps1\\fileserver2",
-      "fileserver3dscConfigurationFunction": "fileserver3dscConfiguration.ps1\\fileserver3"
+    "fileserver3OSDiskName": "fileserver3OSDisk",
+    "fileserver3VmSize": "Standard_D1",
+    "fileserver3VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+    "fileserver3SubnetRef": "[concat(variables('fileserver3VnetID'), '/subnets/', variables('subnetName'))]",
+    "fileserver3StorageAccountContainerName": "vhds",
+    "fileserver3NicName": "[concat(parameters('fileserver3Name'), 'NetworkInterface')]",
+    "fileserver2dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver2",
+    "fileserver3dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver3"
 
   },
   "resources": [
@@ -428,7 +416,7 @@
       "name": "[concat(parameters('vaultname'), '/', variables('backupFabric'), '/', variables('fscontainer'), '/', variables('fsvmcontainer'))]",
       "apiVersion": "2015-11-10",
       "dependsOn": [
-        "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserverdj')]"
+        "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserverdj2')]"
 
       ],
       "location": "[resourceGroup().location]",
@@ -1370,10 +1358,10 @@
                     "typeHandlerVersion": "1.0",
                     "autoUpgradeMinorVersion": true,
                     "settings": {
-                        "workspaceId": "[parameters('workspaceId2')]"
+                        "workspaceId": "[parameters('workspaceId')]"
                     },
                     "protectedSettings": {
-                        "workspaceKey": "[parameters('workspaceKey2')]"
+                        "workspaceKey": "[parameters('workspaceKey')]"
                     }
                 }
             }

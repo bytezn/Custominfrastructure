@@ -26,6 +26,12 @@ Node localhost
             Name = "fileandstorage-services"
             Ensure = "Present"
         } 
+
+		 WindowsFeature DFSMGMT
+        {
+            Name = "RSAT-DFS-MGMT-CON"
+            Ensure = "Present"
+        } 
          
       	File filename
       	{
@@ -55,8 +61,7 @@ Node localhost
             Ensure = 'Present'
 			DependsOn  = "[xSmbShare]myshare"
         }
-
-       
+		       
      }
 
 }
@@ -87,6 +92,12 @@ Node localhost
          WindowsFeature fileservice
         {
             Name = "fileandstorage-services"
+            Ensure = "Present"
+        } 
+
+		 WindowsFeature DFSMGMT
+        {
+            Name = "RSAT-DFS-MGMT-CON"
             Ensure = "Present"
         } 
          
