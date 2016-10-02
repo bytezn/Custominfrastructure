@@ -9,7 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs
  
 Node localhost
     {
@@ -45,11 +45,29 @@ Node localhost
         		DependsOn                 = "[File]filename"
         		Ensure                    = "Present"
         		FolderEnumerationMode     = "Unrestricted"
-        		FullAccess                = "administrator"
+        		FullAccess                = "everyone"
         		PsDscRunAsCredential      = $domainAdminCredentials
         	}
-     
-		        
+     		        
+		 WindowsFeature DFS
+        {
+            Name = 'FS-DFS-Namespace'
+            Ensure = 'Present'
+			DependsOn  = "[xSmbShare]myshare"
+        }
+
+       xDFSNamespaceRoot DFSNamespaceRoot_Domain_Departments
+        {
+            Path                 = '\\contoso.com\departments'
+            TargetPath           = '\\fileserver\myshare'
+            Ensure               = 'present'
+            Type                 = 'DomainV2'
+            Description          = 'AD Domain based DFS namespace for storing departmental files'
+            TimeToLiveSec        = 600
+            PsDscRunAsCredential = $domainAdminCredentials
+			DependsOn            = "[WindowsFeature]DFS"
+        } 
+
      }
 
 }
