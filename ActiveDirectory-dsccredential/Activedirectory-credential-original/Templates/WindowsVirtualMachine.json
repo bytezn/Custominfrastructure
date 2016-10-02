@@ -244,6 +244,7 @@
     "dscbdcConfigurationFunction": "dscDCConfiguration.ps1\\bdc",
     "fileserver2OSDiskName": "fileserver2OSDisk",
     "fileserverVmSize": "Standard_D1",
+    "fileavailabilitysetName": "fileavailset",
     "fileserver2VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "fileserver2StorageAccountContainerName": "vhds",
     "fileserver2NicName": "[concat(parameters('fileserver2Name'), 'NetworkInterface')]",
@@ -580,7 +581,7 @@
       "name": "[variables('nicName')]",
       "location": "[resourceGroup().location]",
       "tags": {
-        "displayName": "NetworkInterface"
+        "displayName": "dcnic"
       },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
@@ -610,7 +611,7 @@
       "name": "[variables('vmName')]",
       "location": "[resourceGroup().location]",
       "tags": {
-        "displayName": "VirtualMachine"
+        "displayName": "dc"
       },
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
@@ -855,6 +856,9 @@
         "displayName": "fileserver"
       },
       "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('fileavailabilitysetName'))]"
+        },
         "hardwareProfile": {
           "vmSize": "[variables('vmSize')]"
         },
@@ -1199,7 +1203,7 @@
           "apiVersion": "2015-06-15",
           "dependsOn": [ ],
           "tags": {
-              "displayName": "Availabilityset"
+              "displayName": "webavailabilityset"
           },
           "properties": {
               "platformUpdateDomainCount": 1,
@@ -1247,39 +1251,43 @@
           "tags": {
               "displayName": "fileserver3"
           },
-          "properties": {
-              "hardwareProfile": {
-                  "vmSize": "[variables('fileserver3VmSize')]"
-              },
-            "osProfile": {
-              "computerName": "[parameters('fileserver3Name')]",
-              "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]"
-            },
-              "storageProfile": {
-                "imageReference": {
-                  "publisher": "[variables('imagePublisher')]",
-                  "offer": "[variables('imageOffer')]",
-                  "sku": "[parameters('windowsOSVersion')]",
-                  "version": "latest"
-                },
-                  "osDisk": {
-                      "name": "fileserver3OSDisk",
-                      "vhd": {
-                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver3StorageAccountContainerName'), '/', variables('fileserver3OSDiskName'), '.vhd')]"
-                      },
-                      "caching": "ReadWrite",
-                      "createOption": "FromImage"
-                  }
-              },
-              "networkProfile": {
-                  "networkInterfaces": [
-                      {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver3NicName'))]"
-                      }
-                  ]
-              }
+        "properties": {
+          "availabilitySet": {
+            "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('fileavailabilitysetName'))]"
           },
+
+          "hardwareProfile": {
+            "vmSize": "[variables('fileserver3VmSize')]"
+          },
+          "osProfile": {
+            "computerName": "[parameters('fileserver3Name')]",
+            "adminUsername": "[parameters('adminUsername')]",
+            "adminPassword": "[parameters('adminPassword')]"
+          },
+          "storageProfile": {
+            "imageReference": {
+              "publisher": "[variables('imagePublisher')]",
+              "offer": "[variables('imageOffer')]",
+              "sku": "[parameters('windowsOSVersion')]",
+              "version": "latest"
+            },
+            "osDisk": {
+              "name": "fileserver3OSDisk",
+              "vhd": {
+                "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver3StorageAccountContainerName'), '/', variables('fileserver3OSDiskName'), '.vhd')]"
+              },
+              "caching": "ReadWrite",
+              "createOption": "FromImage"
+            }
+          },
+          "networkProfile": {
+            "networkInterfaces": [
+              {
+                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver3NicName'))]"
+              }
+            ]
+          }
+        },
         "resources": [
           {
             "apiVersion": "2015-06-15",
@@ -1366,6 +1374,20 @@
                 }
             }
         ]
+      },
+      {
+          "name": "[variables('fileavailabilitysetName')]",
+          "type": "Microsoft.Compute/availabilitySets",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "fileavailabilityset"
+          },
+          "properties": {
+              "platformUpdateDomainCount": 1,
+              "platformFaultDomainCount": 1
+          }
       }
   ]}
 
