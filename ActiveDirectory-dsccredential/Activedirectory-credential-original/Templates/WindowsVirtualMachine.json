@@ -186,7 +186,11 @@
     "fileserver2Name": {
       "type": "string",
       "minLength": 1
-    }
+    },
+      "fileserver3Name": {
+          "type": "string",
+          "minLength": 1
+      }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
@@ -260,7 +264,15 @@
     "dnsNameForLB": "dnsforlb",
     "gatewaySku": "Basic",
     "connectionname": "myconnection",
-    "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]"
+    "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]",
+      "fileserver3OSDiskName": "fileserver3OSDisk",
+      "fileserver3VmSize": "Standard_D1",
+      "fileserver3VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
+      "fileserver3SubnetRef": "[concat(variables('fileserver3VnetID'), '/subnets/', variables('subnetName'))]",
+      "fileserver3StorageAccountContainerName": "vhds",
+      "fileserver3NicName": "[concat(parameters('fileserver3Name'), 'NetworkInterface')]",
+      "fileserver2dscConfigurationFunction": "fileserverdscConfiguration.ps1\\fileserver2",
+      "fileserver3dscConfigurationFunction": "fileserver3dscConfiguration.ps1\\fileserver3"
 
   },
   "resources": [
@@ -867,7 +879,7 @@
         {
           "apiVersion": "2015-06-15",
           "type": "extensions",
-          "name": "fileserverdj",
+          "name": "fileserverdj2",
           "location": "[resourceGroup().location]",
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
@@ -886,6 +898,40 @@
             },
             "protectedsettings": {
               "Password": "[parameters('adminPassword')]"
+            }
+          }
+        },
+        {
+          "type": "extensions",
+          "name": "fileserver2dsc",
+          "apiVersion": "2015-06-15",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserverdj2')]"
+           ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.11",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('fileserver2dscConfigurationFunction')]",
+              "Properties": {
+                "domainName": "[parameters('DomainName')]",
+                "domainAdminCredentials": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:adminPassword"
+                }
+
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "adminPassword": "[parameters('adminPassword')]"
+              }
             }
           }
         }
@@ -1123,6 +1169,143 @@
               "platformUpdateDomainCount": 1,
               "platformFaultDomainCount": 1
           }
+      },
+      {
+          "name": "[variables('fileserver3NicName')]",
+          "type": "Microsoft.Network/networkInterfaces",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+          ],
+          "tags": {
+              "displayName": "fileserver3Nic"
+          },
+        "properties": {
+          "ipConfigurations": [
+            {
+              "name": "ipconfig1",
+              "properties": {
+                "privateIPAllocationMethod": "Dynamic",
+                "subnet": {
+                  "id": "[variables('fileserver3SubnetRef')]"
+                }
+              }
+            }
+          ],
+          "dnsSettings": {
+            "dnsServers": [ "10.2.0.44" ]
+          }
+
+        }
+      },
+      {
+          "name": "[parameters('fileserver3Name')]",
+          "type": "Microsoft.Compute/virtualMachines",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+              "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver3NicName'))]"
+          ],
+          "tags": {
+              "displayName": "fileserver3"
+          },
+          "properties": {
+              "hardwareProfile": {
+                  "vmSize": "[variables('fileserver3VmSize')]"
+              },
+            "osProfile": {
+              "computerName": "[parameters('fileserver3Name')]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
+              "storageProfile": {
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
+                  "osDisk": {
+                      "name": "fileserver3OSDisk",
+                      "vhd": {
+                          "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver3StorageAccountContainerName'), '/', variables('fileserver3OSDiskName'), '.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                  }
+              },
+              "networkProfile": {
+                  "networkInterfaces": [
+                      {
+                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver3NicName'))]"
+                      }
+                  ]
+              }
+          },
+        "resources": [
+          {
+            "apiVersion": "2015-06-15",
+            "type": "extensions",
+            "name": "fileserverdj3",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
+              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Compute",
+              "type": "JsonADDomainExtension",
+              "typeHandlerVersion": "1.0",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "Name": "[parameters('DomainName')]",
+                "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                "Restart": "true",
+                "Options": "3"
+              },
+              "protectedsettings": {
+                "Password": "[parameters('adminPassword')]"
+              }
+            }
+          },
+          {
+            "type": "extensions",
+            "name": "fileserver3dsc",
+            "apiVersion": "2015-06-15",
+            "location": "[resourceGroup().location]",
+            "dependsOn": [
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'),'/extensions/fileserverdj3')]",
+              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserver3dsc')]"
+            ],
+            "properties": {
+              "publisher": "Microsoft.Powershell",
+              "type": "DSC",
+              "typeHandlerVersion": "2.11",
+              "autoUpgradeMinorVersion": true,
+              "settings": {
+                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "configurationFunction": "[variables('fileserver3dscConfigurationFunction')]",
+                "Properties": {
+                  "domainName": "[parameters('DomainName')]",
+                  "domainAdminCredentials": {
+                    "UserName": "[parameters('adminUsername')]",
+                    "Password": "PrivateSettingsRef:adminPassword"
+                  }
+
+                }
+              },
+              "protectedSettings": {
+                "Items": {
+                  "adminPassword": "[parameters('adminPassword')]"
+                }
+              }
+            }
+          }
+        ]
       }
   ]}
 
