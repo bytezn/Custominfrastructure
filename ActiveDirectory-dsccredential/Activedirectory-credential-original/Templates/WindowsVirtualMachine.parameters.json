@@ -12,7 +12,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "charlyffdd33"
+      "value": "descent02lb2"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -25,6 +25,9 @@
       },
       "virtualNetworkName": {
           "value": "myvnet"
+      },
+      "fileserver2Name": {
+          "value": "fileserver2"
       }
     
       }
