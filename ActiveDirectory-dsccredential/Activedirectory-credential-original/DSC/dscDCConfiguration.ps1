@@ -167,7 +167,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xWebadministration
  
 Node localhost
     {
@@ -186,11 +186,37 @@ Node localhost
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true
     	}
-        
+       
+	      
+        WindowsFeature AspNet45
+        {
+            Ensure          = "Present"
+            Name            = "Web-Asp-Net45"
+        }
+
+        xWebsite DefaultSite
+        {
+            Ensure          = "Present"
+            Name            = "Default Web Site"
+            State           = "Stopped"
+            PhysicalPath    = "C:\inetpub\wwwroot"
+            DependsOn       = "[WindowsFeature]web"
+			
+        }
+      
+        File WebContent
+        {
+            Ensure          = "Present"
+            SourcePath      = "c:\webfiles"
+            DestinationPath = "c:\inetpub\wwwroot"
+            Recurse         = $true
+            Type            = "Directory"
+            DependsOn       = "[WindowsFeature]AspNet45"
+			Credential      = $domainAdminCredentials
+        }
+
      }
-
 }
-
 
 configuration bdc
 { 

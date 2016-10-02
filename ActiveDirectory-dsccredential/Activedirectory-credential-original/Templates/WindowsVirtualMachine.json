@@ -154,6 +154,14 @@
         "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
       }
     },
+    "dnsNameForLB": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Globally unique DNS Name for the Public IP used to access the Virtual Machine."
+      }
+    },
+
     "windowsOSVersion": {
       "type": "string",
       "defaultValue": "2012-R2-Datacenter",
@@ -187,22 +195,22 @@
       "type": "string",
       "minLength": 1
     },
-      "fileserver3Name": {
-          "type": "string",
-          "minLength": 1
-      },
-      "workspaceId": {
-          "type": "string",
-          "metadata": {
-              "description": "The Workspace ID is the Operations Management Suite Workspace ID found in the OMS Console under Settings and Connected Sources"
-          }
-      },
-      "workspaceKey": {
-          "type": "string",
-          "metadata": {
-              "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
-          }
+    "fileserver3Name": {
+      "type": "string",
+      "minLength": 1
+    },
+    "workspaceId": {
+      "type": "string",
+      "metadata": {
+        "description": "The Workspace ID is the Operations Management Suite Workspace ID found in the OMS Console under Settings and Connected Sources"
       }
+    },
+    "workspaceKey": {
+      "type": "string",
+      "metadata": {
+        "description": "The Workspace Key is the Operations Management Suite Workspace Key found in the OMS Console under Settings and Connected Sources"
+      }
+    }
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
@@ -285,7 +293,8 @@
     "fileserver3StorageAccountContainerName": "vhds",
     "fileserver3NicName": "[concat(parameters('fileserver3Name'), 'NetworkInterface')]",
     "fileserver2dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver2",
-    "fileserver3dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver3"
+    "fileserver3dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver3",
+      "test1ConfigurationFunction": "test1Configuration.ps1\\Main"
 
   },
   "resources": [
@@ -478,7 +487,7 @@
       "properties": {
         "publicIPAllocationMethod": "Dynamic",
         "dnsSettings": {
-          "domainNameLabel": "[variables('dnsNameForLB')]"
+          "domainNameLabel": "[parameters('dnsNameForLB')]"
         }
       }
     },
@@ -1036,29 +1045,29 @@
                   "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('AvailabilitysetName'))]"
                 },
               "hardwareProfile": {
-                "vmSize": "[variables('vmSize')]",
+                "vmSize": "[variables('vmSize')]"
               },
                   "osProfile": {
                     "computerName": "[concat('web-', copyIndex())]",
                     "adminUsername": "[parameters('adminUsername')]",
                     "adminPassword": "[parameters('adminPassword')]"
                   },
-                  "storageProfile": {
-                    "imageReference": {
-                      "publisher": "[variables('imagePublisher')]",
-                      "offer": "[variables('imageOffer')]",
-                      "sku": "[parameters('windowsOSVersion')]",
-                      "version": "latest"
-                    },
-                    "osDisk": {
-                      "name": "osdisk",
-                      "vhd": {
-                        "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
-                      },
-                      "caching": "ReadWrite",
-                      "createOption": "FromImage"
-                    }
+              "storageProfile": {
+
+                "osDisk": {
+                  "osType": "Windows",
+                  "name": "osdisk",
+                  "createOption": "FromImage",
+                  "image": {
+                    "uri": "https://builder439.blob.core.windows.net/system/Microsoft.Compute/Images/mycontainer/webbuild-osDisk.0c66b4ce-4c24-41d7-8a6e-a86a5275d2c0.vhd"
                   },
+                  "vhd": {
+                    "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+                  },
+                  "caching": "ReadWrite"
+
+                }
+              },
                   "networkProfile": {
                     "networkInterfaces": [
                       {

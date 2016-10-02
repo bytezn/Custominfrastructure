@@ -5,14 +5,11 @@
     "adminUsername": {
       "value": "lawrance"
     },
-    "adminPassword": {
-      "value": "Master123"
-    },
     "domainName": {
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "mydnslb01"
+      "value": "mydnsl5553"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -21,7 +18,7 @@
           "value": "West Europe"
       },
       "virtualNetworkName": {
-          "value": "myvnet"
+          "value": "lawnet"
       },
       "bdcName": {
           "value": "bdc01"
