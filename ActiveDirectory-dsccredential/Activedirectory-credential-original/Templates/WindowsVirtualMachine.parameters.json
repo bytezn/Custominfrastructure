@@ -12,7 +12,7 @@
       "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
-      "value": "sitegodep0kk3"
+      "value": "dnslb026"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -24,16 +24,16 @@
           "value": "myvnet"
       },
       "bdcName": {
-          "value": "sitedepbdc"
+          "value": "bdc01"
       },
       "fileserver2Name": {
-          "value": "sitedepfs"
+          "value": "fileserver"
       },
       "vaultName": {
           "value": "sitedp1"
       },
       "policyName": {
-          "value": "sitegodepp05"
+          "value": "sitepol06"
       },
       "scheduleRunDays": {
           "value": [

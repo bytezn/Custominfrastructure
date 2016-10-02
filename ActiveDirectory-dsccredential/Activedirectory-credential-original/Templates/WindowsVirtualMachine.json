@@ -204,6 +204,7 @@
     "publicIpRef": "publicIp",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
+    "Myavailabilityset": "webserverset",
     "vmName": "dc",
     "vmSize": "Standard_A2",
     "virtualNetworkName": "MyVNET",
@@ -465,6 +466,10 @@
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/',variables('publicIpRef'))]",
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+
+
+
+
       ],
       "properties": {
         "frontendIPConfigurations": [
@@ -897,7 +902,9 @@
         "count": "[parameters('numberOfwebInstances')]"
       },
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "Microsoft.Network/loadBalancers/loadBalancer"
+
 
       ],
       "properties": {
@@ -939,106 +946,112 @@
         "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]"
       ],
       "properties": {
-        "hardwareProfile": {
-          "vmSize": "[variables('vmSize')]"
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('myavailabilityset'))]",
 
-        },
-        "osProfile": {
-          "computerName": "[concat('web-', copyIndex())]",
-          "adminUsername": "[parameters('adminUsername')]",
-          "adminPassword": "[parameters('adminPassword')]"
-        },
-        "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('imagePublisher')]",
-            "offer": "[variables('imageOffer')]",
-            "sku": "[parameters('windowsOSVersion')]",
-            "version": "latest"
-          },
-          "osDisk": {
-            "name": "osdisk",
-            "vhd": {
-              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+          "properties": {
+            "hardwareProfile": {
+              "vmSize": "[variables('vmSize')]"
+
             },
-            "caching": "ReadWrite",
-            "createOption": "FromImage"
-          }
-        },
-        "networkProfile": {
-          "networkInterfaces": [
+            "osProfile": {
+              "computerName": "[concat('web-', copyIndex())]",
+              "adminUsername": "[parameters('adminUsername')]",
+              "adminPassword": "[parameters('adminPassword')]"
+            },
+            "storageProfile": {
+              "imageReference": {
+                "publisher": "[variables('imagePublisher')]",
+                "offer": "[variables('imageOffer')]",
+                "sku": "[parameters('windowsOSVersion')]",
+                "version": "latest"
+              },
+              "osDisk": {
+                "name": "osdisk",
+                "vhd": {
+                  "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+                },
+                "caching": "ReadWrite",
+                "createOption": "FromImage"
+              }
+            },
+            "networkProfile": {
+              "networkInterfaces": [
+                {
+                  "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
+                }
+              ]
+            }
+          },
+          "resources": [
             {
-              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
-            }
-          ]
-        }
-      },
-      "resources": [
-        {
-          "apiVersion": "2015-06-15",
-          "type": "extensions",
-          "name": "webdsc",
-          "location": "[resourceGroup().location]",
-          "dependsOn": [
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
-          ],
-          "properties": {
-            "publisher": "Microsoft.Compute",
-            "type": "JsonADDomainExtension",
-            "typeHandlerVersion": "1.0",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "Name": "[parameters('DomainName')]",
-              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-              "Restart": "true",
-              "Options": "3"
-            },
-            "protectedsettings": {
-              "Password": "[parameters('adminPassword')]"
-            }
-          }
-        },
-        {
-          "name": "webservicedsc",
-          "type": "extensions",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
-            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-            "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
-
-
-          ],
-          "tags": {
-            "displayName": "webservicedscDC"
-          },
-          "properties": {
-            "publisher": "Microsoft.Powershell",
-            "type": "DSC",
-            "typeHandlerVersion": "2.9",
-            "autoUpgradeMinorVersion": true,
-            "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
-              "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
+              "apiVersion": "2015-06-15",
+              "type": "extensions",
+              "name": "webdsc",
+              "location": "[resourceGroup().location]",
+              "dependsOn": [
+                "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+                "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
+              ],
               "properties": {
-                "domainName": "[parameters('domainName')]",
-                "domainAdminCredentials": {
-                  "UserName": "[parameters('adminUserName')]",
-                  "Password": "PrivateSettingsRef:Password"
+                "publisher": "Microsoft.Compute",
+                "type": "JsonADDomainExtension",
+                "typeHandlerVersion": "1.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "Name": "[parameters('DomainName')]",
+                  "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                  "Restart": "true",
+                  "Options": "3"
+                },
+                "protectedsettings": {
+                  "Password": "[parameters('adminPassword')]"
                 }
               }
             },
-            "protectedSettings": {
-              "items": {
-                "Password": "[parameters('adminPassword')]"
+            {
+              "name": "webservicedsc",
+              "type": "extensions",
+              "location": "[resourceGroup().location]",
+              "apiVersion": "2015-06-15",
+              "dependsOn": [
+                "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
+                "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+                "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
+
+
+              ],
+              "tags": {
+                "displayName": "webservicedscDC"
+              },
+              "properties": {
+                "publisher": "Microsoft.Powershell",
+                "type": "DSC",
+                "typeHandlerVersion": "2.9",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                  "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                  "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
+                  "properties": {
+                    "domainName": "[parameters('domainName')]",
+                    "domainAdminCredentials": {
+                      "UserName": "[parameters('adminUserName')]",
+                      "Password": "PrivateSettingsRef:Password"
+                    }
+                  }
+                },
+                "protectedSettings": {
+                  "items": {
+                    "Password": "[parameters('adminPassword')]"
+                  }
+                }
               }
             }
-          }
-        }
-      ]
+          ]
 
+        }
+      }
     },
     {
       "name": "sitesite",
@@ -1096,12 +1109,18 @@
 
 
         }
-
-
       }
+
     }
   ]
-}
+
+
+    }
+ 
+    
+  
+
+      
   
 
   
