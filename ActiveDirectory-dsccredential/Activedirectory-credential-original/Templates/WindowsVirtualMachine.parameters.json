@@ -12,7 +12,7 @@
       "value": "lawrance.com"
     },
     "dnsNameForPublicIP": {
-      "value": "dnslb026"
+      "value": "dnslb05"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -33,7 +33,7 @@
           "value": "sitedp1"
       },
       "policyName": {
-          "value": "sitepol06"
+          "value": "sitepol07"
       },
       "scheduleRunDays": {
           "value": [

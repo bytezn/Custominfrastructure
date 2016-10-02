@@ -204,7 +204,7 @@
     "publicIpRef": "publicIp",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
-    "Myavailabilityset": "webserverset",
+    "AvailabilitysetName": "webserverset",
     "vmName": "dc",
     "vmSize": "Standard_A2",
     "virtualNetworkName": "MyVNET",
@@ -945,114 +945,112 @@
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdstorageName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]"
       ],
-      "properties": {
-        "availabilitySet": {
-          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('myavailabilityset'))]",
-
-          "properties": {
-            "hardwareProfile": {
-              "vmSize": "[variables('vmSize')]"
-
-            },
-            "osProfile": {
-              "computerName": "[concat('web-', copyIndex())]",
-              "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]"
-            },
-            "storageProfile": {
-              "imageReference": {
-                "publisher": "[variables('imagePublisher')]",
-                "offer": "[variables('imageOffer')]",
-                "sku": "[parameters('windowsOSVersion')]",
-                "version": "latest"
-              },
-              "osDisk": {
-                "name": "osdisk",
-                "vhd": {
-                  "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+            "properties": {
+                  "availabilitySet": {
+                  "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('AvailabilitysetName'))]"
                 },
-                "caching": "ReadWrite",
-                "createOption": "FromImage"
-              }
-            },
-            "networkProfile": {
-              "networkInterfaces": [
-                {
-                  "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
-                }
-              ]
-            }
-          },
-          "resources": [
-            {
-              "apiVersion": "2015-06-15",
-              "type": "extensions",
-              "name": "webdsc",
-              "location": "[resourceGroup().location]",
-              "dependsOn": [
-                "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-                "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
-              ],
-              "properties": {
-                "publisher": "Microsoft.Compute",
-                "type": "JsonADDomainExtension",
-                "typeHandlerVersion": "1.0",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                  "Name": "[parameters('DomainName')]",
-                  "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-                  "Restart": "true",
-                  "Options": "3"
-                },
-                "protectedsettings": {
-                  "Password": "[parameters('adminPassword')]"
-                }
-              }
-            },
-            {
-              "name": "webservicedsc",
-              "type": "extensions",
-              "location": "[resourceGroup().location]",
-              "apiVersion": "2015-06-15",
-              "dependsOn": [
-                "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
-                "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-                "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
-
-
-              ],
-              "tags": {
-                "displayName": "webservicedscDC"
+              "hardwareProfile": {
+                "vmSize": "[variables('vmSize')]",
               },
-              "properties": {
-                "publisher": "Microsoft.Powershell",
-                "type": "DSC",
-                "typeHandlerVersion": "2.9",
-                "autoUpgradeMinorVersion": true,
-                "settings": {
-                  "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                  "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                  "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
-                  "properties": {
-                    "domainName": "[parameters('domainName')]",
-                    "domainAdminCredentials": {
-                      "UserName": "[parameters('adminUserName')]",
-                      "Password": "PrivateSettingsRef:Password"
+                  "osProfile": {
+                    "computerName": "[concat('web-', copyIndex())]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPassword')]"
+                  },
+                  "storageProfile": {
+                    "imageReference": {
+                      "publisher": "[variables('imagePublisher')]",
+                      "offer": "[variables('imageOffer')]",
+                      "sku": "[parameters('windowsOSVersion')]",
+                      "version": "latest"
+                    },
+                    "osDisk": {
+                      "name": "osdisk",
+                      "vhd": {
+                        "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+                      },
+                      "caching": "ReadWrite",
+                      "createOption": "FromImage"
+                    }
+                  },
+                  "networkProfile": {
+                    "networkInterfaces": [
+                      {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
+                      }
+                    ]
+                  }
+                },
+                "resources": [
+                  {
+                    "apiVersion": "2015-06-15",
+                    "type": "extensions",
+                    "name": "webdsc",
+                    "location": "[resourceGroup().location]",
+                    "dependsOn": [
+                      "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+                      "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
+                    ],
+                    "properties": {
+                      "publisher": "Microsoft.Compute",
+                      "type": "JsonADDomainExtension",
+                      "typeHandlerVersion": "1.0",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {
+                        "Name": "[parameters('DomainName')]",
+                        "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+                        "Restart": "true",
+                        "Options": "3"
+                      },
+                      "protectedsettings": {
+                        "Password": "[parameters('adminPassword')]"
+                      }
+                    }
+                  },
+                  {
+                    "name": "webservicedsc",
+                    "type": "extensions",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2015-06-15",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
+                      "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+                      "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
+
+
+                    ],
+                    "tags": {
+                      "displayName": "webservicedscDC"
+                    },
+                    "properties": {
+                      "publisher": "Microsoft.Powershell",
+                      "type": "DSC",
+                      "typeHandlerVersion": "2.9",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {
+                        "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+                        "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                        "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
+                        "properties": {
+                          "domainName": "[parameters('domainName')]",
+                          "domainAdminCredentials": {
+                            "UserName": "[parameters('adminUserName')]",
+                            "Password": "PrivateSettingsRef:Password"
+                          }
+                        }
+                      },
+                      "protectedSettings": {
+                        "items": {
+                          "Password": "[parameters('adminPassword')]"
+                        }
+                      }
                     }
                   }
-                },
-                "protectedSettings": {
-                  "items": {
-                    "Password": "[parameters('adminPassword')]"
-                  }
-                }
-              }
-            }
-          ]
+                ]
 
-        }
-      }
-    },
+              },
+      
+    
     {
       "name": "sitesite",
       "type": "Microsoft.Resources/deployments",
@@ -1111,11 +1109,25 @@
         }
       }
 
-    }
-  ]
+    },
+      {
+          "name": "[variables('AvailabilitysetName')]",
+          "type": "Microsoft.Compute/availabilitySets",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "Availabilityset"
+          },
+          "properties": {
+              "platformUpdateDomainCount": 1,
+              "platformFaultDomainCount": 1
+          }
+      }
+  ]}
 
 
-    }
+    
  
     
   
