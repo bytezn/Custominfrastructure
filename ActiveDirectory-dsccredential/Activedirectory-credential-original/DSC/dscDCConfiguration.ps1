@@ -194,25 +194,36 @@ Node localhost
             Name            = "Web-Asp-Net45"
         }
 
-        xWebsite DefaultSite
+        xWebsite DefaultSiteStop
         {
             Ensure          = "Present"
             Name            = "Default Web Site"
             State           = "Stopped"
             PhysicalPath    = "C:\inetpub\wwwroot"
             DependsOn       = "[WindowsFeature]web"
-			
+		
         }
       
         File WebContent
         {
             Ensure          = "Present"
+			Force           = "True"   
             SourcePath      = "c:\webfiles"
             DestinationPath = "c:\inetpub\wwwroot"
             Recurse         = $true
             Type            = "Directory"
-            DependsOn       = "[WindowsFeature]AspNet45"
+            DependsOn       = "[WindowsFeature]DefaultSiteStop"
 			Credential      = $domainAdminCredentials
+        }
+		 
+		 xWebsite DefaultSiteStart
+        {
+            Ensure          = "Present"
+            Name            = "Default Web Site"
+            State           = "Start"
+            PhysicalPath    = "C:\inetpub\wwwroot"
+            DependsOn       = "[File]WebContent"
+			
         }
 
      }
