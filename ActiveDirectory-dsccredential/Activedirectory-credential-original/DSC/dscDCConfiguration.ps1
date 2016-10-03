@@ -207,25 +207,25 @@ Node localhost
         File WebContent
         {
             Ensure          = "Present"
-			Force           = "True"   
+			Force           = $true   
             SourcePath      = "c:\webfiles"
-            DestinationPath = "c:\inetpub\wwwroot"
+            DestinationPath = "c:\inetpub\webfiles"
             Recurse         = $true
             Type            = "Directory"
             DependsOn       = "[xWebsite]DefaultSiteStop"
 			Credential      = $domainAdminCredentials
         }
-		 
-		 xWebsite DefaultSiteStart
+		
+		xWebsite webfiles
         {
             Ensure          = "Present"
-            Name            = "Default Web Site"
+            Name            = "webfiles"
             State           = "Started"
-            PhysicalPath    = "C:\inetpub\wwwroot"
+            PhysicalPath    = "c:\inetpub\webfiles"
             DependsOn       = "[File]WebContent"
-			
         }
 
+		
      }
 }
 
