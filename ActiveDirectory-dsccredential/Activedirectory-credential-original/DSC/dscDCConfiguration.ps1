@@ -212,7 +212,7 @@ Node localhost
             DestinationPath = "c:\inetpub\wwwroot"
             Recurse         = $true
             Type            = "Directory"
-            DependsOn       = "[WindowsFeature]DefaultSiteStop"
+            DependsOn       = "[xWebsite]DefaultSiteStop"
 			Credential      = $domainAdminCredentials
         }
 		 
@@ -220,7 +220,7 @@ Node localhost
         {
             Ensure          = "Present"
             Name            = "Default Web Site"
-            State           = "Start"
+            State           = "Started"
             PhysicalPath    = "C:\inetpub\wwwroot"
             DependsOn       = "[File]WebContent"
 			

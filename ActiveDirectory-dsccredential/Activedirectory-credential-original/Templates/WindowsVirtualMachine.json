@@ -1062,7 +1062,7 @@
                     "uri": "https://builder439.blob.core.windows.net/system/Microsoft.Compute/Images/mycontainer/webbuild-osDisk.0c66b4ce-4c24-41d7-8a6e-a86a5275d2c0.vhd"
                   },
                   "vhd": {
-                    "uri": "[concat('http://','builder439','.blob.core.windows.net/vhds/web-',copyindex(),'-os1disk.vhd')]"
+                    "uri": "[concat('http://','builder439','.blob.core.windows.net/vhds/web-',copyindex(),'-os2disk.vhd')]"
                   },
                   "caching": "ReadWrite"
 
