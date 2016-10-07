@@ -1040,6 +1040,12 @@
                     "adminPassword": "[parameters('adminPassword')]"
                   },
               "storageProfile": {
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
 
                 "osDisk": {
                   "name": "osdisk",
