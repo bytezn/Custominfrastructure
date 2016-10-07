@@ -211,6 +211,7 @@
     "addressPrefix": "10.2.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.2.0.0/24",
+    "webfile": "webfile.ps1",
     "vhdStorageType": "Standard_LRS",
     "publicIPAddressName": "Ipforjumpbox",
     "publicIpRef": "loadbalancerip",
@@ -1041,17 +1042,12 @@
               "storageProfile": {
 
                 "osDisk": {
-                  "osType": "Windows",
                   "name": "osdisk",
-                  "createOption": "FromImage",
-                  "image": {
-                    "uri": "https://builder439.blob.core.windows.net/system/Microsoft.Compute/Images/mycontainer/webbuild-osDisk.0c66b4ce-4c24-41d7-8a6e-a86a5275d2c0.vhd"
-                  },
                   "vhd": {
-                    "uri": "[concat('http://','builder439','.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+                    "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
                   },
-                  "caching": "ReadWrite"
-
+                  "caching": "ReadWrite",
+                  "createOption": "FromImage"
                 }
               },
                   "networkProfile": {
@@ -1125,7 +1121,33 @@
                         }
                       }
                     }
-                  }
+                  },
+                    {
+                        "name": "webfilextract",
+                        "type": "extensions",
+                        "location": "[resourceGroup().location]",
+                        "apiVersion": "2015-06-15",
+                      "dependsOn": [
+                        "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+                        "[concat('Microsoft.Compute/virtualMachines/', concat('web-', copyindex()))]"
+                      ],
+                        "tags": {
+                            "displayName": "webfilextract"
+                        },
+                        "properties": {
+                            "publisher": "Microsoft.Compute",
+                            "type": "CustomScriptExtension",
+                            "typeHandlerVersion": "1.4",
+                            "autoUpgradeMinorVersion": true,
+                          "settings": {
+                            "fileUris": [
+                              "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfile.ps1"
+                            ],
+                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('webfile'))]"
+
+                          }
+                        }
+                    }
                 ]
 
               },
