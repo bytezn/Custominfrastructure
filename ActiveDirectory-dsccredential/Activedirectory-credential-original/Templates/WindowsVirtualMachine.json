@@ -271,6 +271,7 @@
     "fsvmcontainer": "[concat('vm;iaasvmcontainerv2;',variables('resourcegroup'),';',parameters('fileserver2name'))]",
     "vpntype": "RouteBased",
     "localGatewayName": "localGateway",
+    "assetlocation": "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub",
     "lbname": "loadbalancer",
     "lbID": "[resourceId('Microsoft.Network/loadBalancers',variables('lbName'))]",
     "frontEndIPConfigID": "[concat(variables('lbID'),'/frontendIPConfigurations/LoadBalancerFrontEnd')]",
@@ -294,7 +295,7 @@
     "fileserver3NicName": "[concat(parameters('fileserver3Name'), 'NetworkInterface')]",
     "fileserver2dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver2",
     "fileserver3dscConfigurationFunction": "dscDCConfiguration.ps1\\fileserver3",
-      "test1ConfigurationFunction": "test1Configuration.ps1\\Main"
+    "test1ConfigurationFunction": "test1Configuration.ps1\\Main"
 
   },
   "resources": [
@@ -941,8 +942,7 @@
             "typeHandlerVersion": "2.11",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
               "configurationFunction": "[variables('fileserver2dscConfigurationFunction')]",
               "Properties": {
                 "domainName": "[parameters('DomainName')]",
@@ -1054,19 +1054,22 @@
                   },
               "storageProfile": {
 
-                "osDisk": {
-                  "osType": "Windows",
-                  "name": "osdisk",
-                  "createOption": "FromImage",
-                  "image": {
-                    "uri": "https://builder439.blob.core.windows.net/system/Microsoft.Compute/Images/mycontainer/webbuild-osDisk.0c66b4ce-4c24-41d7-8a6e-a86a5275d2c0.vhd"
-                  },
-                  "vhd": {
-                    "uri": "[concat('http://','builder439','.blob.core.windows.net/vhds/web-',copyindex(),'-os5disk.vhd')]"
-                  },
-                  "caching": "ReadWrite"
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
 
+                "osDisk": {
+                  "name": "osdisk",
+                  "vhd": {
+                    "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+                  },
+                  "caching": "ReadWrite",
+                  "createOption": "FromImage"
                 }
+                                          
               },
                   "networkProfile": {
                     "networkInterfaces": [
@@ -1123,8 +1126,7 @@
                       "typeHandlerVersion": "2.9",
                       "autoUpgradeMinorVersion": true,
                       "settings": {
-                        "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                        "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                        "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
                         "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
                         "properties": {
                           "domainName": "[parameters('domainName')]",
@@ -1339,8 +1341,7 @@
               "typeHandlerVersion": "2.11",
               "autoUpgradeMinorVersion": true,
               "settings": {
-                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                "sasToken": "[parameters('_artifactsLocationSasToken')]",
+                "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
                 "configurationFunction": "[variables('fileserver3dscConfigurationFunction')]",
                 "Properties": {
                   "domainName": "[parameters('DomainName')]",
