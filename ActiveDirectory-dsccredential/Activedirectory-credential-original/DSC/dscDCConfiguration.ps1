@@ -9,7 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -77,7 +77,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -167,7 +167,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xWebadministration
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xWebadministration, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -185,6 +185,7 @@ Node localhost
  		Credential                = $domainAdminCredentials
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true
+		DependsOn                 = "[archive]zipfile"
     	}
        
 	      
@@ -193,6 +194,23 @@ Node localhost
             Ensure          = "Present"
             Name            = "Web-Asp-Net45"
         }
+
+		       
+		  xRemoteFile webfiles 
+		
+		{
+            Uri = "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfiles.zip"
+            DestinationPath = c:\zip\webfiles.zip
+        }
+
+	    archive ZipFile 
+		
+		{
+        Path = "c:\zip\webfiles.zip"
+        Destination = "c:\webfiles"
+        Ensure = 'Present'
+        DependsOn  = "[xRemoteFile]webfiles"
+        }
 
         xWebsite DefaultSiteStop
         {
@@ -243,7 +261,7 @@ configuration bdc
         [Int]$RetryIntervalSec=30
     ) 
     
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xPSDesiredStateConfiguration
     
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
    
@@ -297,7 +315,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -331,7 +349,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, xPSDesiredStateConfiguration
  
 Node localhost
     {
