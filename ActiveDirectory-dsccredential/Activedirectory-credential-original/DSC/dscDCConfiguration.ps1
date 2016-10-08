@@ -194,8 +194,7 @@ Node localhost
             Ensure          = "Present"
             Name            = "Web-Asp-Net45"
         }
-
-		       
+				       
 		  xRemoteFile webfiles 
 		
 		{
@@ -203,8 +202,8 @@ Node localhost
             DestinationPath = c:\zip\webfiles.zip
         }
 
-	    archive ZipFile 
-		
+	    archive zipfile 
+
 		{
         Path = "c:\zip\webfiles.zip"
         Destination = "c:\webfiles"
