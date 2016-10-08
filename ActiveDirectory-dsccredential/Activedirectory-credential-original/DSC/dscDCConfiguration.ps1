@@ -167,7 +167,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xWebadministration
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xWebadministration, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -195,15 +195,12 @@ Node localhost
             Name            = "Web-Asp-Net45"
         }
 
-		File webfiledownload
-       
+		       
+		  xRemoteFile webfiles 
+		
 		{
-            DestinationPath = "C:\ZIP"
-            Credential = $domainAdminCredentials
-            Ensure = "Present"
-            SourcePath = "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfiles.zip"
-            Type = "File"
-            Recurse = $true
+            Uri = "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfiles.zip"
+            DestinationPath = c:\zip\webfiles.zip
         }
 
 	    archive ZipFile 
@@ -212,7 +209,7 @@ Node localhost
         Path = "c:\zip\webfiles.zip"
         Destination = "c:\webfiles"
         Ensure = 'Present'
-        DependsOn  = "[file]webfiledownload"
+        DependsOn  = "[xRemoteFile]webfiles"
         }
 
         xWebsite DefaultSiteStop
