@@ -185,6 +185,7 @@ Node localhost
  		Credential                = $domainAdminCredentials
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true
+		DependsOn                 = "[archive]zipfile"
     	}
        
 	      
@@ -193,6 +194,26 @@ Node localhost
             Ensure          = "Present"
             Name            = "Web-Asp-Net45"
         }
+
+		File webfiledownload
+       
+		{
+            DestinationPath = "C:\ZIP"
+            Credential = $domainAdminCredentials
+            Ensure = "Present"
+            SourcePath = "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfiles.zip"
+            Type = "File"
+            Recurse = $true
+        }
+
+	    archive ZipFile 
+		
+		{
+        Path = "c:\zip\webfiles.zip"
+        Destination = "c:\webfiles"
+        Ensure = 'Present'
+        DependsOn  = "[file]webfiledownload"
+        }
 
         xWebsite DefaultSiteStop
         {
@@ -208,7 +229,7 @@ Node localhost
         {
             Ensure          = "Present"
 			Force           = $true   
-            SourcePath      = "c:\scratch2"
+            SourcePath      = "c:\webfiles"
             DestinationPath = "c:\inetpub\webfiles"
             Recurse         = $true
             Type            = "Directory"

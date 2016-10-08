@@ -242,7 +242,7 @@
     "fileserver2OSDiskName": "fileserver2OSDisk",
     "fileserverVmSize": "Standard_D1",
     "fileavailabilitysetName": "fileavailset",
-    "assetlocation":"https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs",
+    "assetlocation": "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub",
     "fileserver2VnetID": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
     "fileserver2StorageAccountContainerName": "vhds",
     "fileserver2NicName": "[concat(parameters('fileserver2Name'), 'NetworkInterface')]",
@@ -1041,6 +1041,12 @@
                   },
               "storageProfile": {
 
+                "imageReference": {
+                  "publisher": "[variables('imagePublisher')]",
+                  "offer": "[variables('imageOffer')]",
+                  "sku": "[parameters('windowsOSVersion')]",
+                  "version": "latest"
+                },
 
                 "osDisk": {
                   "name": "osdisk",
@@ -1122,33 +1128,7 @@
                         }
                       }
                     }
-                  },
-                    {
-                        "name": "webfilextract",
-                        "type": "extensions",
-                        "location": "[resourceGroup().location]",
-                        "apiVersion": "2015-06-15",
-                      "dependsOn": [
-                        "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]",
-                        "[concat('Microsoft.Compute/virtualMachines/', concat('web-', copyindex()))]"
-                      ],
-                        "tags": {
-                            "displayName": "webfilextract"
-                        },
-                        "properties": {
-                            "publisher": "Microsoft.Compute",
-                            "type": "CustomScriptExtension",
-                            "typeHandlerVersion": "1.4",
-                            "autoUpgradeMinorVersion": true,
-                          "settings": {
-                            "fileUris": [
-                              "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfile.ps1"
-                            ],
-                            "commandToExecute": "[concat('powershell -ExecutionPolicy Unrestricted -file ',variables('webfile'))]"
-
-                          }
-                        }
-                    }
+                  }
                 ]
 
               },
