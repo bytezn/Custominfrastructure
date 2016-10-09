@@ -225,7 +225,7 @@ Node localhost
         {
             Ensure          = "Present"
 			Force           = $true   
-            SourcePath      = "c:\webfiles"
+            SourcePath      = "c:\webfiles\webfiles"
             DestinationPath = "c:\inetpub\webfiles"
             Recurse         = $true
             Type            = "Directory"
