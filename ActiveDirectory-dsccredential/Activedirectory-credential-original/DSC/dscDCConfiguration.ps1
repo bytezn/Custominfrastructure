@@ -199,7 +199,7 @@ Node localhost
 		
 		{
             Uri = "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfiles.zip"
-            DestinationPath = c:\zip\webfiles.zip
+            DestinationPath = "c:\zip\webfiles.zip"
         }
 
 	    archive zipfile 

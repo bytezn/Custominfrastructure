@@ -672,8 +672,7 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
               "configurationFunction": "[variables('dscDCConfigurationFunction')]",
               "properties": {
                 "nodeName": "[variables('vmName')]",
@@ -789,8 +788,7 @@
             "typeHandlerVersion": "2.9",
             "autoUpgradeMinorVersion": true,
             "settings": {
-              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "modulesUrl": "[concat(variables('assetlocation'), '/', 'dscDCConfiguration.ps1.zip')]",
               "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
               "properties": {
                 "domainName": "[parameters('domainName')]",
