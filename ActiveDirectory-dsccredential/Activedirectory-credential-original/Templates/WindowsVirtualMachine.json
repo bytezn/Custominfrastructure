@@ -232,7 +232,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.bblob.azurestack.local/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
