@@ -242,7 +242,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -255,12 +255,7 @@
             }
           ]
         },
-        "diagnosticsProfile": {
-          "bootDiagnostics": {
-            "enabled": true,
-            "storageUri": "[concat('http://', variables('diagnosticsStorageAccountName'), '.blob.core.windows.net')]"
-          }
-        }
+      
       },
       "resources": [
         {
@@ -366,7 +361,7 @@
           "osDisk": {
             "name": "fileserverOSDisk",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserverStorageAccountContainerName'), '/', variables('fileserverOSDiskName'), '.vhd')]"
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('fileserverStorageAccountContainerName'), '/', variables('fileserverOSDiskName'), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
