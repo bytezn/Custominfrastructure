@@ -140,6 +140,11 @@
     "subnetPrefix": "10.2.0.0/24",
     "vhdStorageType": "Standard_LRS",
     "publicIPAddressName": "Ipforjumpbox",
+    "dcnsg": "dcnsg",
+    "bdcnsg": "bdcnsg",
+    "fsnsg": "fsnsg",
+    "webnsg": "webnsg",
+    "fs3nsg": "fs3nsg",
     "publicIpRef": "loadbalancerip",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
@@ -240,6 +245,130 @@
         }
       }
     },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('dcnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('fs3nsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('fsnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('bdcnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('webnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
     {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
@@ -380,9 +509,13 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('dcnsg')]"
       ],
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcnsg'))]"
+        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -444,7 +577,7 @@
             }
           ]
         }
-             },
+      },
       "resources": [
         {
           "name": "dscDC",
@@ -491,12 +624,16 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('bdcnsg')]"
       ],
       "tags": {
         "displayName": "bdcNic"
       },
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('bdcnsg'))]"
+        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -606,12 +743,16 @@
       "location": "[resourceGroup().location]",
       "apiVersion": "2015-06-15",
       "dependsOn": [
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('fsnsg')]"
       ],
       "tags": {
         "displayName": "fileserverNic"
       },
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('fsnsg'))]"
+        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -639,7 +780,8 @@
       "apiVersion": "2015-06-15",
       "dependsOn": [
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver2NicName'))]",
+        "[variables('fsnsg')]"
       ],
       "tags": {
         "displayName": "fileserver"
@@ -714,7 +856,7 @@
           "dependsOn": [
             "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'))]",
             "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserverdj2')]"
-           ],
+          ],
           "properties": {
             "publisher": "Microsoft.Powershell",
             "type": "DSC",
@@ -740,30 +882,30 @@
             }
           }
         },
-          {
-              "name": "Microsoft.EnterpriseCloud.Monitoring",
-              "type": "extensions",
-              "location": "[resourceGroup().location]",
-              "apiVersion": "2015-06-15",
-              "dependsOn": [
-                  "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2Name'))]"
-              ],
-              "tags": {
-                  "displayName": "fileserveroms"
-              },
-              "properties": {
-                  "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-                  "type": "MicrosoftMonitoringAgent",
-                  "typeHandlerVersion": "1.0",
-                  "autoUpgradeMinorVersion": true,
-                  "settings": {
-                      "workspaceId": "[parameters('workspaceId')]"
-                  },
-                  "protectedSettings": {
-                      "workspaceKey": "[parameters('workspaceKey')]"
-                  }
-              }
+        {
+          "name": "Microsoft.EnterpriseCloud.Monitoring",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2Name'))]"
+          ],
+          "tags": {
+            "displayName": "fileserveroms"
+          },
+          "properties": {
+            "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+            "type": "MicrosoftMonitoringAgent",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "workspaceId": "[parameters('workspaceId')]"
+            },
+            "protectedSettings": {
+              "workspaceKey": "[parameters('workspaceKey')]"
+            }
           }
+        }
       ]
 
     },
@@ -778,11 +920,15 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-        "Microsoft.Network/loadBalancers/loadBalancer"
+        "Microsoft.Network/loadBalancers/loadBalancer",
+        "[variables('webnsg')]"
 
 
       ],
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('webnsg'))]"
+        },
         "ipConfigurations": [
           {
             "name": "ipconfig",
@@ -820,115 +966,115 @@
         "[concat('Microsoft.Storage/storageAccounts/', variables('vhdstorageName'))]",
         "[concat('Microsoft.Network/networkInterfaces/', 'web-', copyindex(), '-nic')]"
       ],
-            "properties": {
-                  "availabilitySet": {
-                  "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('AvailabilitysetName'))]"
-                },
-              "hardwareProfile": {
-                "vmSize": "[variables('vmSize')]"
-              },
-                  "osProfile": {
-                    "computerName": "[concat('web-', copyIndex())]",
-                    "adminUsername": "[parameters('adminUsername')]",
-                    "adminPassword": "[parameters('adminPassword')]"
-                  },
-              "storageProfile": {
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('AvailabilitysetName'))]"
+        },
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[concat('web-', copyIndex())]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
 
-                "imageReference": {
-                  "publisher": "[variables('imagePublisher')]",
-                  "offer": "[variables('imageOffer')]",
-                  "sku": "[parameters('windowsOSVersion')]",
-                  "version": "latest"
-                },
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          },
 
-                "osDisk": {
-                  "name": "osdisk",
-                  "vhd": {
-                    "uri": "[concat('http://',variables('vhdstoragename'),'.blob.azurestack.local/vhds/web-',copyindex(),'-osdisk.vhd')]"
-                  },
-                  "caching": "ReadWrite",
-                  "createOption": "FromImage"
+          "osDisk": {
+            "name": "osdisk",
+            "vhd": {
+              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.azurestack.local/vhds/web-',copyindex(),'-osdisk.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-06-15",
+          "type": "extensions",
+          "name": "webdsc",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "JsonADDomainExtension",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "Name": "[parameters('DomainName')]",
+              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+              "Restart": "true",
+              "Options": "3"
+            },
+            "protectedsettings": {
+              "Password": "[parameters('adminPassword')]"
+            }
+          }
+        },
+        {
+          "name": "webservicedsc",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
+            "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
+
+
+          ],
+          "tags": {
+            "displayName": "webservicedscDC"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
+              "properties": {
+                "domainName": "[parameters('domainName')]",
+                "domainAdminCredentials": {
+                  "UserName": "[parameters('adminUserName')]",
+                  "Password": "PrivateSettingsRef:Password"
                 }
+              }
+            },
+            "protectedSettings": {
+              "items": {
+                "Password": "[parameters('adminPassword')]"
+              }
+            }
+          }
+        }
+      ]
 
-              },
-                  "networkProfile": {
-                    "networkInterfaces": [
-                      {
-                        "id": "[resourceId('Microsoft.Network/networkInterfaces',concat('web-', copyindex(), '-nic'))]"
-                      }
-                    ]
-                  }
-                },
-                "resources": [
-                  {
-                    "apiVersion": "2015-06-15",
-                    "type": "extensions",
-                    "name": "webdsc",
-                    "location": "[resourceGroup().location]",
-                    "dependsOn": [
-                      "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-                      "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]"
-                    ],
-                    "properties": {
-                      "publisher": "Microsoft.Compute",
-                      "type": "JsonADDomainExtension",
-                      "typeHandlerVersion": "1.0",
-                      "autoUpgradeMinorVersion": true,
-                      "settings": {
-                        "Name": "[parameters('DomainName')]",
-                        "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-                        "Restart": "true",
-                        "Options": "3"
-                      },
-                      "protectedsettings": {
-                        "Password": "[parameters('adminPassword')]"
-                      }
-                    }
-                  },
-                  {
-                    "name": "webservicedsc",
-                    "type": "extensions",
-                    "location": "[resourceGroup().location]",
-                    "apiVersion": "2015-06-15",
-                    "dependsOn": [
-                      "[resourceId('Microsoft.Compute/virtualMachines', concat('web-', copyindex()))]",
-                      "Microsoft.Compute/virtualMachines/dc/extensions/dscDC",
-                      "[concat('Microsoft.Compute/virtualMachines/','web-', copyindex(),'/extensions/webdsc')]"
+    },
 
 
-                    ],
-                    "tags": {
-                      "displayName": "webservicedscDC"
-                    },
-                    "properties": {
-                      "publisher": "Microsoft.Powershell",
-                      "type": "DSC",
-                      "typeHandlerVersion": "2.9",
-                      "autoUpgradeMinorVersion": true,
-                      "settings": {
-                        "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                        "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                        "configurationFunction": "[variables('webservicedscConfigurationFunction')]",
-                        "properties": {
-                          "domainName": "[parameters('domainName')]",
-                          "domainAdminCredentials": {
-                            "UserName": "[parameters('adminUserName')]",
-                            "Password": "PrivateSettingsRef:Password"
-                          }
-                        }
-                      },
-                      "protectedSettings": {
-                        "items": {
-                          "Password": "[parameters('adminPassword')]"
-                        }
-                      }
-                    }
-                  }
-                ]
-
-              },
-      
-    
     {
       "name": "sitesite",
       "type": "Microsoft.Resources/deployments",
@@ -988,199 +1134,204 @@
       }
 
     },
-      {
-          "name": "[variables('AvailabilitysetName')]",
-          "type": "Microsoft.Compute/availabilitySets",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [ ],
-          "tags": {
-              "displayName": "webavailabilityset"
-          },
-          "properties": {
-              "platformUpdateDomainCount": 1,
-              "platformFaultDomainCount": 1
-          }
+    {
+      "name": "[variables('AvailabilitysetName')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "webavailabilityset"
       },
-      {
-          "name": "[variables('fileserver3NicName')]",
-          "type": "Microsoft.Network/networkInterfaces",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-          ],
-          "tags": {
-              "displayName": "fileserver3Nic"
-          },
-        "properties": {
-          "ipConfigurations": [
-            {
-              "name": "ipconfig1",
-              "properties": {
-                "privateIPAllocationMethod": "Dynamic",
-                "subnet": {
-                  "id": "[variables('fileserver3SubnetRef')]"
-                }
+      "properties": {
+        "platformUpdateDomainCount": 1,
+        "platformFaultDomainCount": 1
+      }
+    },
+    {
+      "name": "[variables('fileserver3NicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('fs3nsg')]"
+      ],
+      "tags": {
+        "displayName": "fileserver3Nic"
+      },
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('fs3nsg'))]"
+        },
+        "ipConfigurations": [
+          {
+            "name": "ipconfig1",
+            "properties": {
+              "privateIPAllocationMethod": "Dynamic",
+              "subnet": {
+                "id": "[variables('fileserver3SubnetRef')]"
               }
             }
-          ],
-          "dnsSettings": {
-            "dnsServers": [ "10.2.0.44" ]
           }
-
+        ],
+        "dnsSettings": {
+          "dnsServers": [ "10.2.0.44" ]
         }
-      },
-      {
-          "name": "[parameters('fileserver3Name')]",
-          "type": "Microsoft.Compute/virtualMachines",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-              "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver3NicName'))]"
-          ],
-          "tags": {
-              "displayName": "fileserver3"
-          },
-        "properties": {
-          "availabilitySet": {
-            "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('fileavailabilitysetName'))]"
-          },
 
-          "hardwareProfile": {
-            "vmSize": "[variables('fileserver3VmSize')]"
+      }
+    },
+    {
+      "name": "[parameters('fileserver3Name')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('fileserver3NicName'))]",
+        "[variables('fs3nsg')]"
+      ],
+      "tags": {
+        "displayName": "fileserver3"
+      },
+      "properties": {
+        "availabilitySet": {
+          "id": "[resourceId('Microsoft.Compute/availabilitySets',variables('fileavailabilitysetName'))]"
+        },
+
+        "hardwareProfile": {
+          "vmSize": "[variables('fileserver3VmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('fileserver3Name')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
           },
-          "osProfile": {
-            "computerName": "[parameters('fileserver3Name')]",
-            "adminUsername": "[parameters('adminUsername')]",
-            "adminPassword": "[parameters('adminPassword')]"
-          },
-          "storageProfile": {
-            "imageReference": {
-              "publisher": "[variables('imagePublisher')]",
-              "offer": "[variables('imageOffer')]",
-              "sku": "[parameters('windowsOSVersion')]",
-              "version": "latest"
+          "osDisk": {
+            "name": "fileserver3OSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('fileserver3StorageAccountContainerName'), '/', variables('fileserver3OSDiskName'), '.vhd')]"
             },
-            "osDisk": {
-              "name": "fileserver3OSDisk",
-              "vhd": {
-                "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('fileserver3StorageAccountContainerName'), '/', variables('fileserver3OSDiskName'), '.vhd')]"
-              },
-              "caching": "ReadWrite",
-              "createOption": "FromImage"
-            }
-          },
-          "networkProfile": {
-            "networkInterfaces": [
-              {
-                "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver3NicName'))]"
-              }
-            ]
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
           }
         },
-        "resources": [
-          {
-            "apiVersion": "2015-06-15",
-            "type": "extensions",
-            "name": "fileserverdj3",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
-              "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
-            ],
-            "properties": {
-              "publisher": "Microsoft.Compute",
-              "type": "JsonADDomainExtension",
-              "typeHandlerVersion": "1.0",
-              "autoUpgradeMinorVersion": true,
-              "settings": {
-                "Name": "[parameters('DomainName')]",
-                "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
-                "Restart": "true",
-                "Options": "3"
-              },
-              "protectedsettings": {
-                "Password": "[parameters('adminPassword')]"
-              }
-            }
-          },
-          {
-            "type": "extensions",
-            "name": "fileserver3dsc",
-            "apiVersion": "2015-06-15",
-            "location": "[resourceGroup().location]",
-            "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'),'/extensions/fileserverdj3')]",
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserver2dsc')]"
-            ],
-            "properties": {
-              "publisher": "Microsoft.Powershell",
-              "type": "DSC",
-              "typeHandlerVersion": "2.11",
-              "autoUpgradeMinorVersion": true,
-              "settings": {
-                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                "configurationFunction": "[variables('fileserver3dscConfigurationFunction')]",
-                "Properties": {
-                  "domainName": "[parameters('DomainName')]",
-                  "domainAdminCredentials": {
-                    "UserName": "[parameters('adminUsername')]",
-                    "Password": "PrivateSettingsRef:adminPassword"
-                  }
-
-                }
-              },
-              "protectedSettings": {
-                "Items": {
-                  "adminPassword": "[parameters('adminPassword')]"
-                }
-              }
-            }
-          },
+        "networkProfile": {
+          "networkInterfaces": [
             {
-                "name": "Microsoft.EnterpriseCloud.Monitoring",
-                "type": "extensions",
-                "location": "[resourceGroup().location]",
-                "apiVersion": "2015-06-15",
-                "dependsOn": [
-                    "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3Name'))]"
-                ],
-                "tags": {
-                    "displayName": "fileserver3oms"
-                },
-                "properties": {
-                    "publisher": "Microsoft.EnterpriseCloud.Monitoring",
-                    "type": "MicrosoftMonitoringAgent",
-                    "typeHandlerVersion": "1.0",
-                    "autoUpgradeMinorVersion": true,
-                    "settings": {
-                        "workspaceId": "[parameters('workspaceId')]"
-                    },
-                    "protectedSettings": {
-                        "workspaceKey": "[parameters('workspaceKey')]"
-                    }
-                }
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('fileserver3NicName'))]"
             }
-        ]
+          ]
+        }
       },
-      {
-          "name": "[variables('fileavailabilitysetName')]",
-          "type": "Microsoft.Compute/availabilitySets",
+      "resources": [
+        {
+          "apiVersion": "2015-06-15",
+          "type": "extensions",
+          "name": "fileserverdj3",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
+            "Microsoft.Compute/virtualMachines/dc/extensions/dscDC"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Compute",
+            "type": "JsonADDomainExtension",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "Name": "[parameters('DomainName')]",
+              "User": "[concat(parameters('DomainName'), '\\', parameters('adminUserName'))]",
+              "Restart": "true",
+              "Options": "3"
+            },
+            "protectedsettings": {
+              "Password": "[parameters('adminPassword')]"
+            }
+          }
+        },
+        {
+          "type": "extensions",
+          "name": "fileserver3dsc",
+          "apiVersion": "2015-06-15",
+          "location": "[resourceGroup().location]",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3name'),'/extensions/fileserverdj3')]",
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver2name'),'/extensions/fileserver2dsc')]"
+          ],
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.11",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('fileserver3dscConfigurationFunction')]",
+              "Properties": {
+                "domainName": "[parameters('DomainName')]",
+                "domainAdminCredentials": {
+                  "UserName": "[parameters('adminUsername')]",
+                  "Password": "PrivateSettingsRef:adminPassword"
+                }
+
+              }
+            },
+            "protectedSettings": {
+              "Items": {
+                "adminPassword": "[parameters('adminPassword')]"
+              }
+            }
+          }
+        },
+        {
+          "name": "Microsoft.EnterpriseCloud.Monitoring",
+          "type": "extensions",
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
-          "dependsOn": [ ],
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserver3Name'))]"
+          ],
           "tags": {
-              "displayName": "fileavailabilityset"
+            "displayName": "fileserver3oms"
           },
           "properties": {
-              "platformUpdateDomainCount": 1,
-              "platformFaultDomainCount": 1
+            "publisher": "Microsoft.EnterpriseCloud.Monitoring",
+            "type": "MicrosoftMonitoringAgent",
+            "typeHandlerVersion": "1.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "workspaceId": "[parameters('workspaceId')]"
+            },
+            "protectedSettings": {
+              "workspaceKey": "[parameters('workspaceKey')]"
+            }
           }
+        }
+      ]
+    },
+    {
+      "name": "[variables('fileavailabilitysetName')]",
+      "type": "Microsoft.Compute/availabilitySets",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "fileavailabilityset"
+      },
+      "properties": {
+        "platformUpdateDomainCount": 1,
+        "platformFaultDomainCount": 1
       }
+    }
   ]}
 
 
