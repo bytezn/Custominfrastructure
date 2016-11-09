@@ -60,7 +60,7 @@ if ($UploadArtifacts) {
     }
 
     $StorageAcc = Get-AzureRmStorageAccountKey -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName
-	$StorageAccountKey = "bfm8dJhAdMehkcpV4A3UajdCF4GKHZ9P3G0o+5Pmqjl8E0C5mIo0kZE0ZW3w8UrLy+cpYNbLdIdU+BtRwocPAQ=="
+	$StorageAccountKey = "eoyev0Ldp7zeXcz/v0glXUVsadw5wFn+t2DHoedyCNsXHQkLP8YorSReHvxxZhVwX8vsYaOju7PY7GeTC3QzkQ=="
     $StorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $StorageAccountResourceGroupName -Name $StorageAccountName).Context
 
     # Copy Configuration Data files into staging directory

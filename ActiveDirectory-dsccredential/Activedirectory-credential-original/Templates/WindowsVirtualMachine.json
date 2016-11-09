@@ -85,18 +85,20 @@
   },
   "variables": {
     "imagePublisher": "MicrosoftWindowsServer",
-    "adNicIPAddress": "10.0.0.4",
+    "adNicIPAddress": "10.0.0.44",
     "imageOffer": "WindowsServer",
     "OSDiskName": "osdiskforwindowssimple",
     "nicName": "myVMNic",
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
+    "dcnsg": "dcnsg",
+    "fsnsg":  "fsnsg",
     "subnetPrefix": "10.0.0.0/24",
     "vhdStorageType": "Standard_LRS",
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
     "vhdStorageContainerName": "vhds",
-    "vmName": "MyWindowsVM",
+    "vmName": "dc",
     "vmSize": "Standard_A2",
     "virtualNetworkName": "MyVNET",
     "vnetId": "[resourceId('Microsoft.Network/virtualNetworks', variables('virtualNetworkName'))]",
@@ -147,6 +149,56 @@
       }
     },
     {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('dcnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('fsnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
@@ -180,14 +232,20 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('dcnsg')]"
       ],
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcnsg'))]"
+        },
+
         "ipConfigurations": [
           {
             "name": "ipconfig1",
             "properties": {
-              "privateIPAllocationMethod": "Dynamic",
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('adnicipaddress')]",
               "publicIPAddress": {
                 "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIPAddressName'))]"
               },
@@ -243,7 +301,7 @@
             }
           ]
         }
-       
+
       },
       "resources": [
         {
@@ -292,12 +350,16 @@
       "apiVersion": "2015-06-15",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
-     
+        "[variables('fsnsg')]"
+
       ],
       "tags": {
         "displayName": "fileserverNic"
       },
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('fsnsg'))]"
+        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -311,10 +373,10 @@
         ],
 
         "dnsSettings": {
-          "dnsServers": [ "10.0.0.4" ]
-          
-        }  
-            
+          "dnsServers": [ "10.0.0.44" ]
+
+        }
+
       }
 
     },
@@ -370,7 +432,8 @@
           "location": "[resourceGroup().location]",
           "apiVersion": "2015-06-15",
           "dependsOn": [
-            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]"
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('fileserverName'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
           ],
           "tags": {
             "displayName": "fileserverdsc"
