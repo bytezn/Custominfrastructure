@@ -9,7 +9,7 @@
       "value": "contoso.com"
     },
     "dnsNameForPublicIP": {
-      "value": "lawpub10"
+      "value": "lawpub15"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
@@ -40,7 +40,7 @@
           "value": "uqJ84hFHys/oA0z6jfdvYkIo8CQG2e+If1s/inJUPtse84vfCXxzfSofUfRmHg6dYsupChEj3f/tM/eV6Yh5aQ=="
       },
       "dnsNameForLB": {
-          "value": "lawlb10"
+          "value": "lawlb15"
       }
     
       }
