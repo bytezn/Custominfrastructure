@@ -26,56 +26,7 @@
       "fileserver2Name": {
           "value": "fileserver2"
       },
-      "vaultName": {
-          "value": "myvault"
-      },
-      "policyName": {
-          "value": "mypolicy"
-      },
-      "scheduleRunDays": {
-          "value": [
-              "Monday"
-          ]
-      },
-      "scheduleRunTimes": {
-          "value": [
-              "2016-09-12T11:00:00.000Z"
-          ]
-      },
-      "weeklyRetentionDurationCount": {
-          "value": 3
-      },
-      "daysOfTheWeekForMontlyRetention": {
-          "value": [
-              "Monday"
-          ]
-      },
-      "weeksOfTheMonthForMonthlyRetention": {
-          "value": [
-              "First"
-          ]
-      },
-      "monthlyRetentionDurationCount": {
-          "value": 3
-      },
-      "monthsOfYear": {
-          "value": [
-              "January"
-          ]
-      },
-      "daysOfTheWeekForYearlyRetention": {
-          "value": [
-              "Monday"
-          ]
-      },
-      "weeksOfTheMonthForYearlyRetention": {
-          "value": [
-              "First"
-          ]
-      },
-      "yearlyRetentionDurationCount": {
-          "value": 3
-      },
+      
       "sharedKey": {
           "value": "sharedkey"
       },
