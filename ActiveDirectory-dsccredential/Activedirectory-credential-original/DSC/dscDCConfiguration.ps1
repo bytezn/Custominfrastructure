@@ -47,6 +47,7 @@ Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XC
             SafemodeAdministratorPassword = $DomainCreds
             DatabasePath = "c:\NTDS"
             LogPath = "c:\NTDS"
+			SiteName = 'Default-First-Site-Name'
             SysvolPath = "c:\SYSVOL"
         }
 	   

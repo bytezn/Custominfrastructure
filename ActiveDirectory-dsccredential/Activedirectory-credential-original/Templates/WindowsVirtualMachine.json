@@ -98,6 +98,8 @@
     "addressPrefix": "10.0.0.0/16",
     "subnetName": "Subnet",
     "subnetPrefix": "10.0.0.0/24",
+    "dcnsg": "dcnsg",
+    "bdcnsg": "bdcnsg",
     "vhdStorageType": "Standard_LRS",
     "publicIPAddressName": "myPublicIP",
     "publicIPAddressType": "Dynamic",
@@ -158,6 +160,56 @@
       }
     },
     {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('dcnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
+      "apiVersion": "2015-05-01-preview",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "name": "[variables('bdcnsg')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "all",
+            "properties": {
+              "description": "Allow all",
+              "protocol": "Tcp",
+              "sourcePortRange": "*",
+              "destinationPortRange": "*",
+              "sourceAddressPrefix": "*",
+              "destinationAddressPrefix": "*",
+              "access": "Allow",
+              "priority": 200,
+              "direction": "Inbound"
+            }
+          }
+        ]
+      }
+    },
+
+    {
       "apiVersion": "2015-06-15",
       "type": "Microsoft.Network/virtualNetworks",
       "name": "[variables('virtualNetworkName')]",
@@ -191,9 +243,13 @@
       },
       "dependsOn": [
         "[concat('Microsoft.Network/publicIPAddresses/', variables('publicIPAddressName'))]",
-        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('dcnsg')]"
       ],
       "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('dcnsg'))]"
+        },
         "ipConfigurations": [
           {
             "name": "ipconfig1",
@@ -255,7 +311,7 @@
             }
           ]
         }
-      
+
       },
       "resources": [
         {
@@ -304,7 +360,7 @@
       "apiVersion": "2015-06-15",
       "dependsOn": [
         "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-     
+
       ],
       "tags": {
         "displayName": "fileserverNic"
@@ -325,126 +381,130 @@
 
         "dnsSettings": {
           "dnsServers": [ "10.0.0.4" ]
-          
-        }  
-            
+
+        }
+
       }
 
     },
-      {
-          "name": "[variables('bdcNicName')]",
-          "type": "Microsoft.Network/networkInterfaces",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]"
-          ],
-          "tags": {
-              "displayName": "bdcNic"
-          },
-          "properties": {
-            "ipConfigurations": [
-              {
-                "name": "ipconfig1",
-                "properties": {
-                  "privateIPAllocationMethod": "Static",
-                  "privateIPAddress": "[variables('bdcnicipaddress')]",
-                  "subnet": {
-                    "id": "[variables('subnetRef')]"
-                  }
-                }
-              }
-            ],
-            "dnsSettings": {
-              "dnsServers": [ "10.0.0.4" ]
-
-            }
-          }
+    {
+      "name": "[variables('bdcNicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Network/virtualNetworks/', variables('virtualNetworkName'))]",
+        "[variables('bdcnsg')]"
+      ],
+      "tags": {
+        "displayName": "bdcNic"
       },
-      {
-          "name": "[parameters('bdcName')]",
-          "type": "Microsoft.Compute/virtualMachines",
-          "location": "[resourceGroup().location]",
-          "apiVersion": "2015-06-15",
-          "dependsOn": [
-              "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
-              "[concat('Microsoft.Network/networkInterfaces/', variables('bdcNicName'))]"
-          ],
-          "tags": {
-              "displayName": "bdc"
-          },
-          "properties": {
-            "hardwareProfile": {
-              "vmSize": "[variables('vmSize')]"
-            },
-            "osProfile": {
-              "computerName": "[parameters('bdcName')]",
-              "adminUsername": "[parameters('adminUsername')]",
-              "adminPassword": "[parameters('adminPassword')]"
-            },
-              "storageProfile": {
-                "imageReference": {
-                  "publisher": "[variables('imagePublisher')]",
-                  "offer": "[variables('imageOffer')]",
-                  "sku": "[parameters('windowsOSVersion')]",
-                  "version": "latest"
-                },
-                  "osDisk": {
-                      "name": "bdcOSDisk",
-                    "vhd": {
-                      "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
-                    },
-                      "caching": "ReadWrite",
-                      "createOption": "FromImage"
-                  }
-              },
-              "networkProfile": {
-                  "networkInterfaces": [
-                      {
-                          "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('bdcNicName'))]"
-                      }
-                  ]
-              }
-          },
-        "resources": [
+      "properties": {
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('bdcnsg'))]"
+        },
+        "ipConfigurations": [
           {
-            "name": "dscbdc",
-            "type": "extensions",
-            "location": "[resourceGroup().location]",
-            "apiVersion": "2015-06-15",
-            "dependsOn": [
-              "[concat('Microsoft.Compute/virtualMachines/', parameters('bdcname'))]",
-                     "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
-            ],
-            "tags": {
-              "displayName": "dscDC"
-            },
+            "name": "ipconfig1",
             "properties": {
-              "publisher": "Microsoft.Powershell",
-              "type": "DSC",
-              "typeHandlerVersion": "2.9",
-              "autoUpgradeMinorVersion": true,
-              "settings": {
-                "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
-                "sasToken": "[parameters('_artifactsLocationSasToken')]",
-                "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
-                "properties": {
-                  "domainName": "[parameters('domainName')]",
-                  "domainAdminCredentials": {
-                    "UserName": "[parameters('adminUserName')]",
-                    "Password": "PrivateSettingsRef:Password"
-                  }
-                }
-              },
-              "protectedSettings": {
-                "items": {
-                  "Password": "[parameters('adminPassword')]"
-                }
+              "privateIPAllocationMethod": "Static",
+              "privateIPAddress": "[variables('bdcnicipaddress')]",
+              "subnet": {
+                "id": "[variables('subnetRef')]"
               }
             }
           }
-        ]
+        ],
+        "dnsSettings": {
+          "dnsServers": [ "10.0.0.4" ]
+
+        }
       }
+    },
+    {
+      "name": "[parameters('bdcName')]",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [
+        "[concat('Microsoft.Storage/storageAccounts/', variables('vhdStorageName'))]",
+        "[concat('Microsoft.Network/networkInterfaces/', variables('bdcNicName'))]"
+      ],
+      "tags": {
+        "displayName": "bdc"
+      },
+      "properties": {
+        "hardwareProfile": {
+          "vmSize": "[variables('vmSize')]"
+        },
+        "osProfile": {
+          "computerName": "[parameters('bdcName')]",
+          "adminUsername": "[parameters('adminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('imagePublisher')]",
+            "offer": "[variables('imageOffer')]",
+            "sku": "[parameters('windowsOSVersion')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "name": "bdcOSDisk",
+            "vhd": {
+              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.azurestack.local/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
+            },
+            "caching": "ReadWrite",
+            "createOption": "FromImage"
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('bdcNicName'))]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "name": "dscbdc",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-15",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', parameters('bdcname'))]",
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmname'),'/extensions/dscDC')]"
+          ],
+          "tags": {
+            "displayName": "dscDC"
+          },
+          "properties": {
+            "publisher": "Microsoft.Powershell",
+            "type": "DSC",
+            "typeHandlerVersion": "2.9",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "modulesUrl": "[concat(parameters('_artifactsLocation'), '/', 'dscDCConfiguration.ps1.zip')]",
+              "sasToken": "[parameters('_artifactsLocationSasToken')]",
+              "configurationFunction": "[variables('dscbdcConfigurationFunction')]",
+              "properties": {
+                "domainName": "[parameters('domainName')]",
+                "domainAdminCredentials": {
+                  "UserName": "[parameters('adminUserName')]",
+                  "Password": "PrivateSettingsRef:Password"
+                }
+              }
+            },
+            "protectedSettings": {
+              "items": {
+                "Password": "[parameters('adminPassword')]"
+              }
+            }
+          }
+        }
+      ]
+    }
   ]
 }
       
