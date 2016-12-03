@@ -2,5 +2,29 @@
     "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "location": {
+            "value": "West Europe"
+        },
+        "adminUsername": {
+            "value": "lawrance"
+        },
+        "virtualNetworkName": {
+            "value": "mynet"
+        },
+        "domainName": {
+            "value": "mydomainlr.com"
+        },
+        "dnsNameForPublicIP": {
+            "value": "mydomainlr"
+        },
+        "bdcName": {
+            "value": "mybdc"
+        },
+        "fileserver2Name": {
+            "value": "myfs2"
+        },
+        "blobtarget": {
+            "value": ".blob.core.windows.net"
+        }
     }
 }

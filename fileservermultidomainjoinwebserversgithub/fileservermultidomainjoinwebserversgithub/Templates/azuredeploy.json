@@ -10,6 +10,7 @@
         "West Europe",
         "North Europe",
         "East Asia",
+        "Local",
         "Southeast Asia"
       ],
       "metadata": {
@@ -32,6 +33,15 @@
       }
     },
 
+
+    "blobtarget": {
+      "type": "string",
+      "metadata": {
+        "description": "Specify Your Blob Target"
+      }
+
+
+    },
 
     "virtualNetworkName": {
       "type": "string",
@@ -245,7 +255,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
+              "uri": "[concat('http://', variables('vhdStorageName'), parameters('blobtarget'),'/', variables('vhdStorageContainerName'), '/', variables('OSDiskName'), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -365,7 +375,7 @@
           "osDisk": {
             "name": "bdcOSDisk",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
+              "uri": "[concat('http://', variables('vhdStorageName'), parameters('blobtarget'),'/', variables('bdcStorageAccountContainerName'), '/', variables('bdcOSDiskName'), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -479,7 +489,7 @@
           "osDisk": {
             "name": "fileserverOSDisk",
             "vhd": {
-              "uri": "[concat('http://', variables('vhdStorageName'), '.blob.core.windows.net/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
+              "uri": "[concat('http://', variables('vhdStorageName'), parameters('blobtarget'),'/', variables('fileserver2StorageAccountContainerName'), '/', variables('fileserver2OSDiskName'), '.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
@@ -586,7 +596,7 @@
           "osDisk": {
             "name": "osdisk",
             "vhd": {
-              "uri": "[concat('http://',variables('vhdstoragename'),'.blob.core.windows.net/vhds/web-',copyindex(),'-osdisk.vhd')]"
+              "uri": "[concat('http://',variables('vhdstoragename'),parameters('blobtarget'),'/','vhds/web-',copyindex(),'-osdisk.vhd')]"
             },
             "caching": "ReadWrite",
             "createOption": "FromImage"
