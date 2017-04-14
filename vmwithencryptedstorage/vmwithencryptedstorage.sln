@@ -7,6 +7,10 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmwithencryptedstorage", "v
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "2vmsencryptedstorage", "2vmsencryptedstorage\2vmsencryptedstorage.deployproj", "{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "2vmencryptednatrules", "2vmencryptednatrules\2vmencryptednatrules.deployproj", "{CAD9AA5C-3CDD-42C6-85B6-9863E3E7F629}"
+EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmswithlbnatrules", "vmswithlbnatrules\vmswithlbnatrules.deployproj", "{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,6 +25,14 @@ Global
 		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CAD9AA5C-3CDD-42C6-85B6-9863E3E7F629}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CAD9AA5C-3CDD-42C6-85B6-9863E3E7F629}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CAD9AA5C-3CDD-42C6-85B6-9863E3E7F629}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CAD9AA5C-3CDD-42C6-85B6-9863E3E7F629}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

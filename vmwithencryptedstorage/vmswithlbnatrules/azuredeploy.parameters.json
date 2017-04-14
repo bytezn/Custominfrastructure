@@ -1,0 +1,15 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "storageAccounts_1basediag6976_name": {
+      "value": "4basediag6976"
+    },
+    "storageAccounts_1basedisks2156_name": {
+      "value": "4basedisks2156"
+    },
+    "storageAccounts_1storeageacclr6_name": {
+      "value": "4storeageacclr6"
+    }
+  }
+}
