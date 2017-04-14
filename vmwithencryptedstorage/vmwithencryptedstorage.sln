@@ -11,6 +11,8 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "2vmencryptednatrules", "2vm
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmswithlbnatrules", "vmswithlbnatrules\vmswithlbnatrules.deployproj", "{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmnatlblinux", "vmnatlblinux\vmnatlblinux.deployproj", "{5438272E-BEB8-423D-850D-12EC214FC019}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C15A168B-CE83-4C9A-9BD5-D21E83F5D70E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5438272E-BEB8-423D-850D-12EC214FC019}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5438272E-BEB8-423D-850D-12EC214FC019}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5438272E-BEB8-423D-850D-12EC214FC019}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5438272E-BEB8-423D-850D-12EC214FC019}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
