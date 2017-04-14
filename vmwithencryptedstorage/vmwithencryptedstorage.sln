@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmwithencryptedstorage", "vmwithencryptedstorage\vmwithencryptedstorage.deployproj", "{8F684275-180A-4278-8D90-13EBD8081978}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "2vmsencryptedstorage", "2vmsencryptedstorage\2vmsencryptedstorage.deployproj", "{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{8F684275-180A-4278-8D90-13EBD8081978}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F684275-180A-4278-8D90-13EBD8081978}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F684275-180A-4278-8D90-13EBD8081978}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7FB6EE14-62CA-4496-9D4C-42B666B1DF74}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
