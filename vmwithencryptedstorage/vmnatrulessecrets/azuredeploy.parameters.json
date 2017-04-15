@@ -1,0 +1,17 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "AdminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/9d94f3d1-636a-40f2-836e-d2de79643e2a/resourceGroups/keygroup/providers/Microsoft.KeyVault/vaults/Keylaw"
+        },
+        "secretName": "lawrance"
+      }
+    },
+    "ADminUsername": {
+      "value": "lawrance"
+    }
+  }
+}

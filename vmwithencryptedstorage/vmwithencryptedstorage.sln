@@ -13,6 +13,8 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmswithlbnatrules", "vmswit
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmnatlblinux", "vmnatlblinux\vmnatlblinux.deployproj", "{5438272E-BEB8-423D-850D-12EC214FC019}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmnatrulessecrets", "vmnatrulessecrets\vmnatrulessecrets.deployproj", "{3AFC692E-DB7C-4818-A516-4188A05709B5}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{5438272E-BEB8-423D-850D-12EC214FC019}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{5438272E-BEB8-423D-850D-12EC214FC019}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{5438272E-BEB8-423D-850D-12EC214FC019}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3AFC692E-DB7C-4818-A516-4188A05709B5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3AFC692E-DB7C-4818-A516-4188A05709B5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3AFC692E-DB7C-4818-A516-4188A05709B5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3AFC692E-DB7C-4818-A516-4188A05709B5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
