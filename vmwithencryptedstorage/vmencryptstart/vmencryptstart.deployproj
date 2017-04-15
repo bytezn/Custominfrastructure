@@ -11,7 +11,7 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>04e63e81-5941-4f7b-b5ad-fcc7a8f83ca4</ProjectGuid>
+    <ProjectGuid>8073545d-66ba-4937-a9cc-a2013cf1ecdf</ProjectGuid>
   </PropertyGroup>
   <PropertyGroup>
     <TargetFrameworkIdentifier>Deployment</TargetFrameworkIdentifier>
@@ -25,35 +25,12 @@
   <Import Condition=" Exists('$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets') " Project="$(MSBuildExtensionsPath)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Deployment\1.1\DeploymentProject.targets" />
   <!-- vertag<:>end -->
   <ItemGroup>
-    <Folder Include="Scripts\" />
-    <Folder Include="Templates\" />
-    <Folder Include="Tools\" />
-  </ItemGroup>
-  <ItemGroup>
+    <Content Include="azuredeploy.json" />
+    <Content Include="azuredeploy.parameters.json" />
     <None Include="Deployment.targets">
       <Visible>False</Visible>
     </None>
-    <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
-    <Content Include="Templates\azuredeploy.json" />
-    <Content Include="Templates\azuredeploy.parameters.json" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Tools\AzCopy.exe" />
-    <Content Include="Tools\Microsoft.Data.Edm.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.Data.OData.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.Data.Services.Client.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.WindowsAzure.Storage.dll">
-      <Visible>False</Visible>
-    </Content>
-    <Content Include="Tools\Microsoft.WindowsAzure.Storage.DataMovement.dll">
-      <Visible>False</Visible>
-    </Content>
+    <Content Include="Deploy-AzureResourceGroup.ps1" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>

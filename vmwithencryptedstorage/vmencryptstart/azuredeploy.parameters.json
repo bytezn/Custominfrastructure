@@ -1,0 +1,48 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmName": {
+      "value": "myvmlrvv"
+    },
+
+    "AdminPassword": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/9d94f3d1-636a-40f2-836e-d2de79643e2a/resourceGroups/keygroup/providers/Microsoft.KeyVault/vaults/Keylaw"
+        },
+        "secretName": "lawrance"
+      }
+    },
+    "ADminUsername": {
+      "value": "lawrance"
+    },
+
+      "virtualNetworkName": {
+      "value": "myvnet"
+    },
+    "subnetName": {
+      "value": "mysubnet"
+    },
+    "aadClientID": {
+      "value": "115bcd8e-e003-4c39-a24c-0f2923314030"
+    },
+    "keyVaultName": {
+      "value": "Keylaw"
+    },
+    "keyVaultResourceGroup": {
+      "value": "keygroup"
+    },
+    "keyEncryptionKeyURL": {
+      "value": "/subscriptions/9d94f3d1-636a-40f2-836e-d2de79643e2a/resourceGroups/keygroup/providers/Microsoft.KeyVault/vaults/Keylaw"
+    },
+    "aadClientSecret": {
+      "reference": {
+        "keyVault": {
+          "id": "/subscriptions/9d94f3d1-636a-40f2-836e-d2de79643e2a/resourceGroups/keygroup/providers/Microsoft.KeyVault/vaults/Keylaw"
+        },
+        "secretName": "AEDC2236-5659-4A22-BAB4-31B715A6EA6D"
+      }
+    }
+  }
+}
