@@ -1,29 +1,34 @@
-
-
- Configuration Sample_InstallChromeBrowser
-
- Import-DscResource -ModuleName PSDesiredStateConfiguration, xchrome
+Configuration main
 
 {
-    param
-    (
-    [Parameter(Mandatory)]
-    $Language,
-        
-    [Parameter(Mandatory)]
-    $LocalPath
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $localpath,
+    [string] $language
 
-	[Parameter(Mandatory)]
-    $nodename
-    
-        
-    )
-    
-    Import-DscResource -module xChrome
-    
-    MSFT_xChrome chrome
+)
+ 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration, XChrome
+
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+ 	
+   		 MSFT_xChrome chrome
     {
     Language = $Language
     LocalPath = $LocalPath
     }
+        
+    }
+
 }
