@@ -55,8 +55,8 @@
   "variables": {
     "xchromeArchiveFolder": "DSC",
     "xchromeArchiveFileName": "xchrome.zip",
-    "language": "english",
-    "localpath": "c:\temp"
+    "language": "en",
+    "localpath": "C:\\Windows\\Temp\\GoogleChromeStandaloneEnterprise.msi"
 
   },
 

@@ -2,5 +2,17 @@
   "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
   "contentVersion": "1.0.0.0",
   "parameters": {
+    "virtualMachines_myserver_name": {
+      "value": "myserver3223"
+    },
+    "storageAccounts_basediag697_name": {
+      "value": "1basediag69768"
+    },
+    "storageAccounts_basedisks215_name": {
+      "value": "1basedisks21568"
+    },
+    "storageAccounts_storeageacclr_name": {
+      "value": "1storeageacclr68"
+    }
   }
 }
