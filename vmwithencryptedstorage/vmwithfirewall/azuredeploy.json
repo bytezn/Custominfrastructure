@@ -54,7 +54,11 @@
   },
   "variables": {
     "firewalldscArchiveFolder": "DSC",
-    "firewalldscArchiveFileName": "firewalldsc.zip"},
+    "firewalldscArchiveFileName": "firewalldsc.zip",
+    "language": "en",
+    "localpath": "C:\\Windows\\Temp\\GoogleChromeStandaloneEnterprise.msi"
+  },
+
   "resources": [
     {
       "comments": "Generalized from resource: '/subscriptions/9d94f3d1-636a-40f2-836e-d2de79643e2a/resourceGroups/base/providers/Microsoft.Compute/virtualMachines/myserver'.",
@@ -137,7 +141,9 @@
                 "function": "Main"
               },
               "configurationArguments": {
-                "nodeName": "[parameters('virtualMachines_myserver_name')]"
+                "nodeName": "[parameters('virtualMachines_myserver_name')]",
+                "language": "[variables('language')]",
+                "localpath": "[variables('localpath')]"
               }
             },
             "protectedSettings": {

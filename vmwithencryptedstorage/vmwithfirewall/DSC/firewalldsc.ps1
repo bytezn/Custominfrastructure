@@ -1,11 +1,13 @@
 configuration Main
 {
     param
-    (
-        [string[]] $NodeName = 'localhost'
-    )
+    (   
+    [string] $NodeName,
+    [string] $localpath,
+    [string] $language
+	)
 
-    Import-DSCResource -ModuleName xNetworking
+    Import-DSCResource -ModuleName xPSDesiredStateConfiguration, xNetworking, xChrome
 
     Node $NodeName
     {
@@ -25,5 +27,13 @@ configuration Main
             Program               = 'c:\windows\system32\notepad.exe'
             Service               = 'WinRM'
         }
+
+        MSFT_xChrome chrome
+        {
+            Language = $Language
+            LocalPath = $LocalPath
+            DependsOn = '[xFirewall]Firewall'
+        }
+
     }
  }

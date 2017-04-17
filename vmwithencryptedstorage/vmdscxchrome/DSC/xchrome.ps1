@@ -23,7 +23,7 @@ Node localhost
             AllowModuleOverwrite = $true
         }
  	
-   		 MSFT_xChrome chrome
+    MSFT_xChrome chrome
     {
     Language = $Language
     LocalPath = $LocalPath
