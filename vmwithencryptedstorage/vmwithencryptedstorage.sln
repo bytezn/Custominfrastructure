@@ -19,6 +19,8 @@ Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmencryptstart", "vmencrypt
 EndProject
 Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmdscxchrome", "vmdscxchrome\vmdscxchrome.deployproj", "{DED06486-09BF-4B58-B83A-87B689D1C622}"
 EndProject
+Project("{151D2E53-A2C4-4D7D-83FE-D05416EBD58E}") = "vmwithfirewall", "vmwithfirewall\vmwithfirewall.deployproj", "{A1770FC3-A3DA-40C6-A58A-C65652609754}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +59,10 @@ Global
 		{DED06486-09BF-4B58-B83A-87B689D1C622}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DED06486-09BF-4B58-B83A-87B689D1C622}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DED06486-09BF-4B58-B83A-87B689D1C622}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A1770FC3-A3DA-40C6-A58A-C65652609754}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A1770FC3-A3DA-40C6-A58A-C65652609754}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A1770FC3-A3DA-40C6-A58A-C65652609754}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A1770FC3-A3DA-40C6-A58A-C65652609754}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
