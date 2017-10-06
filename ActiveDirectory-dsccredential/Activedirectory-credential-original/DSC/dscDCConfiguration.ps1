@@ -9,10 +9,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName XComputerManagement,
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
-Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
-
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -43,7 +40,7 @@ Node localhost
       		DependsOn                 = "[WindowsFeature]fileservice"
       		Ensure                    = "Present"
       		Force                     = $true
-      		PsDscRunAsCredential      = $domainAdminCredentials
+      		Credential                = $domainAdminCredentials
       		Type                      = "File"
       	}
                     
@@ -55,7 +52,7 @@ Node localhost
         		Ensure                    = "Present"
         		FolderEnumerationMode     = "Unrestricted"
         		FullAccess                = "everyone"
-        		PsDscRunAsCredential      = $domainAdminCredentials
+        		#PsDscRunAsCredential      = $domainAdminCredentials
         	}
      		        
 		 WindowsFeature DFS
@@ -80,10 +77,8 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
-Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
-	
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xSmbShare, xdfs, xPSDesiredStateConfiguration
+ 
 Node localhost
     {
         LocalConfigurationManager
@@ -113,7 +108,7 @@ Node localhost
       		DependsOn                 = "[WindowsFeature]fileservice"
       		Ensure                    = "Present"
       		Force                     = $true
-      		PsDscRunAsCredential      = $domainAdminCredentials
+      		Credential                = $domainAdminCredentials
       		Type                      = "File"
       	}
                     
@@ -125,7 +120,7 @@ Node localhost
         		Ensure                    = "Present"
         		FolderEnumerationMode     = "Unrestricted"
         		FullAccess                = "everyone"
-        		PsDscRunAsCredential      = $domainAdminCredentials
+        		#Credential                = $domainAdminCredentials
         	}
      		        
 		 WindowsFeature DFS
@@ -142,7 +137,7 @@ Node localhost
             Type                 = 'DomainV2'
             Description          = 'AD Domain based DFS namespace for storing departmental files'
             TimeToLiveSec        = 600
-            PsDscRunAsCredential = $domainAdminCredentials
+            #PsDscRunAsCredential = $domainAdminCredentials
 			DependsOn            = "[WindowsFeature]DFS"
         } 
 
@@ -154,7 +149,7 @@ Node localhost
             Type                 = 'DomainV2'
             Description          = 'AD Domain based DFS namespace for storing departmental files'
             TimeToLiveSec        = 600
-            PsDscRunAsCredential = $domainAdminCredentials
+            #PsDscRunAsCredential = $domainAdminCredentials
 			DependsOn            = "[xDFSNamespaceRoot]DFSNamespaceRoot_Domain_DepartmentA"
         } 
 	}
@@ -172,10 +167,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
-Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
-Import-DscResource -ModuleName xwebadministration
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xWebadministration, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -274,10 +266,7 @@ configuration bdc
         [Int]$RetryIntervalSec=30
     ) 
     
-Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
-Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
-Import-DscResource -ModuleName xactivedirectory
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement, xPSDesiredStateConfiguration
     
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
    
@@ -331,10 +320,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-    
-Import-DscResource -ModuleName XComputerManagement,
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
-Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
+Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement, xPSDesiredStateConfiguration
  
 Node localhost
     {
@@ -368,10 +354,7 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
-Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
-Import-DscResource -ModuleName xactivedirectory
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, xPSDesiredStateConfiguration
  
 Node localhost
     {
