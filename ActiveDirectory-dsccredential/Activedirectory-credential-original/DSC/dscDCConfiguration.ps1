@@ -1,3 +1,166 @@
+Configuration fileserver2
+{
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $domainName,
+    [System.Management.Automation.PSCredential]$domainAdminCredentials
+)
+ 
+Import-DscResource -ModuleName XComputerManagement,
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
+
+ 
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+ 
+         WindowsFeature fileservice
+        {
+            Name = "fileandstorage-services"
+            Ensure = "Present"
+        } 
+
+		 WindowsFeature DFSMGMT
+        {
+            Name = "RSAT-DFS-MGMT-CON"
+            Ensure = "Present"
+        } 
+         
+      	File filename
+      	{
+      		DestinationPath           = "c:\1\2.txt"
+      		Contents                  = "myfile"
+      		DependsOn                 = "[WindowsFeature]fileservice"
+      		Ensure                    = "Present"
+      		Force                     = $true
+      		PsDscRunAsCredential      = $domainAdminCredentials
+      		Type                      = "File"
+      	}
+                    
+        xSmbShare myshare 
+        	{
+        		Name                      = "myshare"
+        		Path                      = "c:\1"
+        		DependsOn                 = "[File]filename"
+        		Ensure                    = "Present"
+        		FolderEnumerationMode     = "Unrestricted"
+        		FullAccess                = "everyone"
+        		PsDscRunAsCredential      = $domainAdminCredentials
+        	}
+     		        
+		 WindowsFeature DFS
+        {
+            Name = 'FS-DFS-Namespace'
+            Ensure = 'Present'
+			DependsOn  = "[xSmbShare]myshare"
+        }
+		       
+     }
+
+}
+
+Configuration fileserver3
+{
+ 
+[CmdletBinding()]
+ 
+Param (
+    [string] $NodeName,
+    [string] $domainName,
+    [System.Management.Automation.PSCredential]$domainAdminCredentials
+)
+ 
+Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
+	
+Node localhost
+    {
+        LocalConfigurationManager
+        {
+            ConfigurationMode = 'ApplyAndAutoCorrect'
+            RebootNodeIfNeeded = $true
+            ActionAfterReboot = 'ContinueConfiguration'
+            AllowModuleOverwrite = $true
+        }
+ 
+         WindowsFeature fileservice
+        {
+            Name = "fileandstorage-services"
+            Ensure = "Present"
+        } 
+
+		 WindowsFeature DFSMGMT
+        {
+            Name = "RSAT-DFS-MGMT-CON"
+            Ensure = "Present"
+        } 
+         
+      	File filename
+      	{
+      		DestinationPath           = "c:\1\2.txt"
+      		Contents                  = "myfile"
+      		DependsOn                 = "[WindowsFeature]fileservice"
+      		Ensure                    = "Present"
+      		Force                     = $true
+      		PsDscRunAsCredential      = $domainAdminCredentials
+      		Type                      = "File"
+      	}
+                    
+        xSmbShare myshare 
+        	{
+        		Name                      = "myshare"
+        		Path                      = "c:\1"
+        		DependsOn                 = "[File]filename"
+        		Ensure                    = "Present"
+        		FolderEnumerationMode     = "Unrestricted"
+        		FullAccess                = "everyone"
+        		PsDscRunAsCredential      = $domainAdminCredentials
+        	}
+     		        
+		 WindowsFeature DFS
+        {
+            Name = 'FS-DFS-Namespace'
+            Ensure = 'Present'
+		}
+
+		xDFSNamespaceRoot DFSNamespaceRoot_Domain_DepartmentA
+        {
+            Path                 = '\\contoso.com\departments'
+            TargetPath           = '\\fileserver3\myshare'
+            Ensure               = 'present'
+            Type                 = 'DomainV2'
+            Description          = 'AD Domain based DFS namespace for storing departmental files'
+            TimeToLiveSec        = 600
+            PsDscRunAsCredential = $domainAdminCredentials
+			DependsOn            = "[WindowsFeature]DFS"
+        } 
+
+		xDFSNamespaceRoot DFSNamespaceRoot_Domain_DepartmentB
+        {
+            Path                 = '\\contoso.com\departments'
+            TargetPath           = '\\fileserver2\myshare'
+            Ensure               = 'present'
+            Type                 = 'DomainV2'
+            Description          = 'AD Domain based DFS namespace for storing departmental files'
+            TimeToLiveSec        = 600
+            PsDscRunAsCredential = $domainAdminCredentials
+			DependsOn            = "[xDFSNamespaceRoot]DFSNamespaceRoot_Domain_DepartmentA"
+        } 
+	}
+}
+
+
 Configuration web
 {
  
@@ -9,7 +172,10 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
+Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
+Import-DscResource -ModuleName xwebadministration
  
 Node localhost
     {
@@ -21,18 +187,78 @@ Node localhost
             AllowModuleOverwrite = $true
         }
  	
+	
+	      xRemoteFile webfiles 
+		
+		{
+            Uri = "https://raw.githubusercontent.com/bytezn/softwaredefined/master/fsdswebvltplcmultibkups2sbaldfs-gthub/webfiles.zip"
+            DestinationPath = "c:\zip\webfiles.zip"
+        }
+
+	    archive zipfile 
+		
+		{
+           Path = "c:\zip\webfiles.zip"
+           Destination = "c:\webfiles"
+           Ensure = 'Present'
+           DependsOn  = "[xRemoteFile]webfiles"
+        } 
+	
+	
    		WindowsFeature web 
+		
      	{
  		Name                      = "web-server"
  		Credential                = $domainAdminCredentials
  		Ensure                    = "Present"
  		IncludeAllSubFeature      = $true
+		DependsOn                 = "[archive]zipfile"
     	}
-        
+       
+	      
+        WindowsFeature AspNet45
+        {
+            Ensure          = "Present"
+            Name            = "Web-Asp-Net45"
+        }
+
+		 
+		
+
+        xWebsite DefaultSiteStop
+        {
+            Ensure          = "Present"
+            Name            = "Default Web Site"
+            State           = "Stopped"
+            PhysicalPath    = "C:\inetpub\wwwroot"
+            DependsOn       = "[WindowsFeature]web"
+		
+        }
+      
+        File WebContent
+        {
+            Ensure          = "Present"
+			Force           = $true   
+            SourcePath      = "c:\webfiles\webfiles"
+            DestinationPath = "c:\inetpub\webfiles"
+            Recurse         = $true
+            Type            = "Directory"
+            DependsOn       = "[xWebsite]DefaultSiteStop"
+			Credential      = $domainAdminCredentials
+        }
+		
+		xWebsite webfiles
+        {
+            Ensure          = "Present"
+            Name            = "webfiles"
+            State           = "Started"
+            PhysicalPath    = "c:\inetpub\webfiles"
+            DependsOn       = "[File]WebContent"
+        }
+
+		
      }
-
 }
-
 
 configuration bdc
 { 
@@ -48,7 +274,10 @@ configuration bdc
         [Int]$RetryIntervalSec=30
     ) 
     
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory, XComputerManagement
+Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
+Import-DscResource -ModuleName xactivedirectory
     
     [System.Management.Automation.PSCredential ]$DomainCreds = New-Object System.Management.Automation.PSCredential ("${DomainName}\$($DomainAdmincredentials.UserName)", $DomainAdmincredentials.Password)
    
@@ -102,7 +331,10 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, XComputerManagement
+    
+Import-DscResource -ModuleName XComputerManagement,
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
  
 Node localhost
     {
@@ -136,7 +368,10 @@ Param (
     [System.Management.Automation.PSCredential]$domainAdminCredentials
 )
  
-Import-DscResource -ModuleName PSDesiredStateConfiguration, xActiveDirectory
+Import-DscResource -ModuleName XComputerManagement -ModuleVersion 2.1.0.0 
+Import-DscResource -ModuleName PSDesiredStateConfiguration, xsmbshare, xdfs 
+Import-DscResource -ModuleName xPSDesiredStateConfiguration -moduleversion 7.0.0.0
+Import-DscResource -ModuleName xactivedirectory
  
 Node localhost
     {
