@@ -257,7 +257,7 @@
     "gatewaySubnetPrefix": "10.2.200.0/29",
     "gatewayPublicIPName": "azureGatewayIP",
     "gatewayName": "azureGateway",
-    "dnsNameForLB": "dnsforlb",
+    "dnsNameForLB": "[concat(parameters('dnsNameForPublicIP'), '01')]",
     "gatewaySku": "Basic",
     "connectionname": "myconnection",
     "gatewaySubnetRef": "[concat(variables('vnetID'),'/subnets/','GatewaySubnet')]"

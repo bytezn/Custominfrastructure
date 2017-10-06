@@ -9,10 +9,10 @@
       "value": "Master123"
     },
     "domainName": {
-      "value": "lawrance2.com"
+      "value": "mydom.com"
     },
     "dnsNameForPublicIP": {
-      "value": "dnslb052"
+      "value": "sharepointsatlr4"
     },
     "windowsOSVersion": {
       "value": "2012-R2-Datacenter"
